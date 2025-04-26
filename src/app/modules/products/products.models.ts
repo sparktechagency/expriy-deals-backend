@@ -13,10 +13,11 @@ const imageSchema = new Schema({
 const productsSchema = new Schema<IProducts>(
   {
     images: [imageSchema],
-    author: { type: String,
-      ref:{
-        
-      }, required: [true, 'Product author is required'] },
+    author: {
+      type: String,
+      ref: "User",
+      required: [true, 'Product author is required'],
+    },
     name: { type: String, required: [true, 'Product name is required'] },
     details: { type: String, required: [true, 'Product details are required'] },
     category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
@@ -24,6 +25,7 @@ const productsSchema = new Schema<IProducts>(
     quantity: { type: String, required: [true, 'Quantity is required'] },
     expiredAt: { type: String, required: [true, 'Expiry date is required'] },
     discount: { type: Number, default: 0 },
+    discountPerDayIncise: { type: Number, default: 0 },
     isDeleted: { type: 'boolean', default: false },
   },
   {

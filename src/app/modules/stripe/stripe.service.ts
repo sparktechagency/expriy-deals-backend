@@ -23,6 +23,7 @@ const stripLinkAccount = async (userId: string) => {
     const accountLink = await StripeService.connectAccount(
       return_url,
       refresh_url,
+      account?.id,
     );
 
     return accountLink.url;
@@ -68,6 +69,7 @@ const refresh = async (paymentId: string, query: Record<string, any>) => {
     const accountLink = await StripeService.connectAccount(
       return_url,
       refresh_url,
+      paymentId,
     );
     return accountLink.url;
   } catch (error: any) {
@@ -80,14 +82,7 @@ const returnUrl = async (payload: {
   stripeAccountId: string;
   userId: string;
 }) => {
-  try {
-    // const response = await stripe.oauth.token({
-    //   grant_type: "authorization_code",
-    //   code: query.code as string,
-    // });
-
-    // const connectedAccountId = response.stripe_user_id;
-
+  try { 
     const user = await User.findByIdAndUpdate(payload.userId, {
       stripeAccountId: payload?.stripeAccountId,
     });

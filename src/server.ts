@@ -10,8 +10,7 @@ import { defaultTask } from './app/utils/defaultTask';
 const colors = require('colors');
 
 let server: Server;
-export const io = initializeSocketIO(createServer(app));
-// export const io = initializeSocketIO(createServer(app));
+export const io = initializeSocketIO(createServer(app)); 
 
 async function main() {
   try {

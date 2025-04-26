@@ -27,14 +27,14 @@ class StripeService<T> {
     }
   }
 
-  public async connectAccount(returnUrl: string, refreshUrl: string) {
+  public async connectAccount(
+    returnUrl: string,
+    refreshUrl: string,
+    accountId: string,
+  ) {
     try {
-      const account = await this.stripe().accounts.create({
-        // email: user?.email, (optional: uncomment if you want to pass user's email)
-      });
-
       const accountLink = await this.stripe().accountLinks.create({
-        account: account.id,
+        account: accountId,
         return_url: returnUrl,
         refresh_url: refreshUrl,
         type: 'account_onboarding',

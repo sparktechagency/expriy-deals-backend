@@ -14,6 +14,7 @@ export interface IProducts {
   quantity: string;
   expiredAt: string;
   discount: number;
+  discountPerDayIncise: number;
   isDeleted: boolean;
 }
 
