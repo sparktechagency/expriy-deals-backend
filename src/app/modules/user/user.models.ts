@@ -41,12 +41,15 @@ const userSchema: Schema<IUser> = new Schema(
       enum: ['Male', 'Female', 'Others'],
       default: null,
     },
-
+    stripeAccountId: {
+      type: String,
+      default: null,
+    },
     dateOfBirth: {
       type: String,
       default: null,
     },
-    
+
     isGoogleLogin: {
       type: Boolean,
       default: false,
@@ -115,7 +118,6 @@ userSchema.post(
     next();
   },
 );
- 
 
 userSchema.statics.isUserExist = async function (email: string) {
   return await User.findOne({ email: email }).select('+password');

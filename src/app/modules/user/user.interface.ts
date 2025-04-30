@@ -12,6 +12,7 @@ export interface IUser {
   password: string;
   gender: 'Male' | 'Female' | 'Others';
   dateOfBirth: string;
+  stripeAccountId: string;
   profile: string;
   role: string;
   isGoogleLogin: boolean;
