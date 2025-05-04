@@ -91,6 +91,10 @@ const userSchema: Schema<IUser> = new Schema(
         default: false,
       },
     },
+    balance: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

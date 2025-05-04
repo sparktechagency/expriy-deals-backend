@@ -15,6 +15,7 @@ export interface IUser {
   stripeAccountId: string;
   profile: string;
   role: string;
+  balance: number;
   isGoogleLogin: boolean;
   address?: string;
   needsPasswordChange: boolean;
