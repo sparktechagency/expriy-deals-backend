@@ -6,6 +6,7 @@ export interface UploadedFiles {
   images?: Express.Multer.File[];
   frontSide?: Express.Multer.File[];
   backSide?: Express.Multer.File[];
+  document?: Express.Multer.File[];
   videos?: Express.Multer.File[];
   documents?: Express.Multer.File[];
 }

@@ -1,11 +1,8 @@
 import { Model, Types } from 'mongoose';
 
 export interface IUser {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // [x: string]: any;
   _id?: Types.ObjectId;
   status: string;
-  username: string;
   name: string;
   email: string;
   phoneNumber: string;
@@ -14,6 +11,7 @@ export interface IUser {
   dateOfBirth: string;
   stripeAccountId: string;
   profile: string;
+  document: string;
   role: string;
   balance: number;
   isGoogleLogin: boolean;

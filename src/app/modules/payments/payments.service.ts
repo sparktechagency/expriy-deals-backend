@@ -3,17 +3,36 @@ import { IPayments } from './payments.interface';
 import Payments from './payments.models';
 import AppError from '../../error/AppError';
 import QueryBuilder from '../../class/builder/QueryBuilder';
+import AuthPaymentService from '../../class/Auth.net/Auth.net';
+const paymentService = new AuthPaymentService();
+interface PaymentRequest {
+  amount: number;
+  cardNumber: string;
+  expiryDate: string;
+  cardCode: string;
+  firstName: string;
+  lastName: string;
+}
 
 const createPayments = async (payload: IPayments) => {
-  const result = await Payments.create(payload);
-  if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create payments');
-  }
+  const data: PaymentRequest = {
+    amount: 200,
+    cardNumber: '123',
+    cardCode: '4111111111111111',
+    expiryDate: '1225',
+    firstName: 'John',
+    lastName: 'Doe',
+  };
+  const result = await paymentService.createCharge(data);
+  // const result = await Payments.create(payload);
+  // if (!result) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create payments');
+  // }
+  console.log(result);
   return result;
 };
 
 const getAllPayments = async (query: Record<string, any>) => {
- 
   const paymentsModel = new QueryBuilder(
     Payments.find({ isDeleted: false }),
     query,

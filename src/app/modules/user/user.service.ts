@@ -13,21 +13,24 @@ export type IFilter = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
+
 const createUser = async (payload: IUser): Promise<IUser> => {
   const isExist = await User.isUserExist(payload.email as string);
-
   if (isExist && !isExist?.verification?.status) {
-    const { email, ...updateData } = payload;
+    const { email, balance, ...updateData } = payload;
     updateData.password = await bcrypt.hash(
       payload?.password,
       Number(config.bcrypt_salt_rounds),
     );
+
     const user = await User.findByIdAndUpdate(isExist?._id, updateData, {
       new: true,
     });
+
     if (!user) {
       throw new AppError(httpStatus.BAD_REQUEST, 'user creation failed');
     }
+
     return user;
   } else if (isExist && isExist?.verification?.status) {
     throw new AppError(
@@ -78,6 +81,7 @@ const geUserById = async (id: string) => {
 };
 
 const updateUser = async (id: string, payload: Partial<IUser>) => {
+  delete payload.balance;
   const user = await User.findByIdAndUpdate(id, payload, { new: true });
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User updating failed');

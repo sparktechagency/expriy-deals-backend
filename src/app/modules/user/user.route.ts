@@ -5,14 +5,18 @@ import { userValidation } from './user.validation';
 import auth from '../../middleware/auth';
 import { USER_ROLE } from './user.constants';
 import parseData from '../../middleware/parseData';
-import fileUpload from '../../middleware/fileUpload';
-const upload = fileUpload('./public/uploads/profile');
+import multer, { memoryStorage } from 'multer';
 
 const router = Router();
+const storage = memoryStorage();
+const upload = multer({ storage });
 
 router.post(
   '/',
-  upload.single('profile'),
+  upload.fields([
+    { name: 'profile', maxCount: 1 },
+    { name: 'document', maxCount: 2 },
+  ]),
   parseData(),
   validateRequest(userValidation?.guestValidationSchema),
   userController.createUser,
@@ -33,6 +37,7 @@ router.patch(
     USER_ROLE.sub_admin,
     USER_ROLE.super_admin,
     USER_ROLE.user,
+    USER_ROLE.vendor,
   ),
   upload.single('profile'),
   parseData(),
@@ -46,6 +51,7 @@ router.delete(
     USER_ROLE.sub_admin,
     USER_ROLE.super_admin,
     USER_ROLE.user,
+    USER_ROLE.vendor,
   ),
   userController.deleteMYAccount,
 );
@@ -62,6 +68,7 @@ router.get(
     USER_ROLE.sub_admin,
     USER_ROLE.super_admin,
     USER_ROLE.user,
+    USER_ROLE.vendor,
   ),
   userController.getMyProfile,
 );

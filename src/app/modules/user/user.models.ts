@@ -28,6 +28,7 @@ const userSchema: Schema<IUser> = new Schema(
     phoneNumber: {
       type: String,
       required: true,
+      unique: true,
       default: null,
     },
 
@@ -41,10 +42,7 @@ const userSchema: Schema<IUser> = new Schema(
       enum: ['Male', 'Female', 'Others'],
       default: null,
     },
-    stripeAccountId: {
-      type: String,
-      default: null,
-    },
+
     dateOfBirth: {
       type: String,
       default: null,
@@ -54,7 +52,12 @@ const userSchema: Schema<IUser> = new Schema(
       type: Boolean,
       default: false,
     },
+
     profile: {
+      type: String,
+      default: null,
+    },
+    document: {
       type: String,
       default: null,
     },
