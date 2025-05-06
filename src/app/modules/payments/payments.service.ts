@@ -17,9 +17,9 @@ interface PaymentRequest {
 const createPayments = async (payload: IPayments) => {
   const data: PaymentRequest = {
     amount: 200,
-    cardNumber: '123',
-    cardCode: '4111111111111111',
-    expiryDate: '1225',
+    cardNumber: '4111111111111111',
+    expiryDate: '12/25',
+    cardCode: '123',
     firstName: 'John',
     lastName: 'Doe',
   };
@@ -28,7 +28,7 @@ const createPayments = async (payload: IPayments) => {
   // if (!result) {
   //   throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create payments');
   // }
-  console.log(result);
+  // console.log(result);
   return result;
 };
 

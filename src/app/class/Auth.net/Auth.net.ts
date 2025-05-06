@@ -52,7 +52,6 @@ class AuthPaymentService {
         : authorizenet.Constants.endpoint.production;
   }
 
-  // Create a charge (authCaptureTransaction)
   async createCharge(
     request: ChargeRequest,
   ): Promise<{ transactionId: string; authCode: string }> {
@@ -82,10 +81,6 @@ class AuthPaymentService {
       const paymentType = new authorizenet.APIContracts.PaymentType();
       paymentType.setCreditCard(creditCard);
 
-      //   var orderDetails = new authorizenet.APIContracts.OrderType();
-      //   orderDetails.setInvoiceNumber(invoiceNumber ?? 'INV-12345');
-      //   orderDetails.setDescription('Product Description');
-
       // Create billing information
       const billTo = new authorizenet.APIContracts.CustomerAddressType();
       billTo.setFirstName(firstName);
@@ -95,12 +90,13 @@ class AuthPaymentService {
       const transactionRequest =
         new authorizenet.APIContracts.TransactionRequestType();
       transactionRequest.setTransactionType(
-        authorizenet.APIContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION,
+        authorizenet.APIContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION, // Use AUTHONLYTRANSACTION if only authorizing
       );
-      transactionRequest.setAmount(amount.toFixed(2));
+      transactionRequest.setAmount(amount.toFixed(2)); // Amount needs to be a string with 2 decimals
       transactionRequest.setPayment(paymentType);
-      transactionRequest.setCurrencyCode('USD');
+      transactionRequest.setCurrencyCode('CHF'); // Use USD for sandbox testing
       transactionRequest.setBillTo(billTo);
+      transactionRequest.setRefTransId('Niloy232');
 
       // Create the controller request
       const createRequest =
@@ -112,54 +108,73 @@ class AuthPaymentService {
       const ctrl = new authorizenet.APIControllers.CreateTransactionController(
         createRequest.getJSON(),
       );
-
       ctrl.setEnvironment(this.environment); // Set environment explicitly
+
       const response =
         await new Promise<authorizenet.APIContracts.CreateTransactionResponse>(
           (resolve, reject) => {
             ctrl.execute(() => {
-            const rawResponse = ctrl.getResponse(); // raw JSON object
-            const response =
-              new authorizenet.APIContracts.CreateTransactionResponse(
-                rawResponse,
-              );
-              
-              if (apiResponse) resolve(apiResponse);
-              else reject(new Error('No response from Authorize.Net'));
+              const rawResponse = ctrl.getResponse(); // raw JSON object
+              console.log('Raw Response from Authorize.Net:', rawResponse); // Log the raw response
+
+              if (rawResponse) {
+                const apiResponse =
+                  new authorizenet.APIContracts.CreateTransactionResponse(
+                    rawResponse,
+                  );
+                resolve(apiResponse); // Properly resolve the response
+              } else {
+                console.error('No response from Authorize.Net');
+                reject(new Error('No response from Authorize.Net'));
+              }
             });
           },
         );
 
+      // Check if the response contains the transaction response
+      if (!response || !response.getTransactionResponse()) {
+        console.error('Invalid response or missing transaction response');
+        throw new Error('Invalid response from Authorize.Net');
+      }
+
       const transactionResponse = response.getTransactionResponse();
-      if (
-        response.getMessages().getResultCode() ===
-          authorizenet.APIContracts.MessageTypeEnum.OK &&
-        transactionResponse
-      ) {
-        if (transactionResponse.getResponseCode() === '1') {
-          return {
-            transactionId: transactionResponse.getTransId(),
-            authCode: transactionResponse.getAuthCode(),
-          };
-        } else {
-          const errors = transactionResponse
-            .getErrors()
-            ?.getError()
-            ?.map((e: { getErrorText: () => any }) => e.getErrorText()) || [
-            'Unknown error',
-          ];
-          throw new Error(`Payment failed: ${errors.join(', ')}`);
-        }
+
+      // Check the resultCode for errors
+      const resultCode = response.getMessages().getResultCode();
+      if (resultCode === 'Error') {
+        const errorMessages = response.getMessages().getMessage();
+        // Log the specific error message(s)
+        const errors =
+          errorMessages
+            ?.map((m: { getText: () => any }) => m.getText())
+            .join(', ') || 'Unknown error';
+
+        console.error('Transaction failed with errors:', errors);
+        throw new Error(`Payment failed: ${errors}`);
+      }
+
+      // Log the transaction response
+      console.log('Transaction Response:', transactionResponse);
+
+      // Check if transaction is successful
+      if (transactionResponse.getResponseCode() === '1') {
+        return {
+          ...transactionResponse,
+        };
       } else {
-        const errors = response
-          .getMessages()
-          ?.getMessage()
-          ?.map((m: { getText: () => any }) => m.getText()) || [
+        // Log detailed errors for better diagnostics
+        const errors = transactionResponse
+          .getErrors()
+          ?.getError()
+          ?.map((e: { getErrorText: () => any }) => e.getErrorText()) || [
           'Unknown error',
         ];
-        throw new Error(`API error: ${errors.join(', ')}`);
+
+        console.error('Transaction failed with errors:', errors);
+        throw new Error(`Payment failed: ${errors.join(', ')}`);
       }
     } catch (error: any) {
+      // Log the error to help identify the issue
       console.error('Create charge error:', error);
       throw new Error(`Payment processing failed: ${error.message}`);
     }
@@ -225,7 +240,7 @@ class AuthPaymentService {
           authorizenet.APIContracts.MessageTypeEnum.OK &&
         transactionResponse
       ) {
-        if (transactionResponse.getResponseCode() === '1') {
+        if (transactionResponse?.getResponseCode() === '1') {
           return {
             transactionId: transactionResponse.getTransId(),
             status: 'Refunded',
@@ -312,3 +327,8 @@ class AuthPaymentService {
   }
 }
 export default AuthPaymentService;
+
+
+
+
+

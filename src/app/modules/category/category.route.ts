@@ -29,7 +29,7 @@ router.patch(
 
 router.delete(
   '/:id',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin), 
   auth(USER_ROLE.admin),
   categoryController.deleteCategory,
 );
