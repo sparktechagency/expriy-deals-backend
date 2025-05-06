@@ -1,6 +1,15 @@
+import { Model, ObjectId } from 'mongoose';
+import { IUser } from '../user/user.interface';
 
-import { Model } from 'mongoose';
+export interface IWithdrawRequest {
+  vendor: ObjectId | IUser;
+  amount: Number;
+  status: 'pending' | 'approved' | 'rejected';
+  region: string;
+  bankDetails: ObjectId;
+}
 
-export interface IWithdrawRequest {}
-
-export type IWithdrawRequestModules = Model<IWithdrawRequest, Record<string, unknown>>;
+export type IWithdrawRequestModules = Model<
+  IWithdrawRequest,
+  Record<string, unknown>
+>;

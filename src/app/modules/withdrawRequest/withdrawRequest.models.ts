@@ -1,35 +1,42 @@
-
 import { model, Schema } from 'mongoose';
-import { IWithdrawRequest, IWithdrawRequestModules } from './withdrawRequest.interface';
+import {
+  IWithdrawRequest,
+  IWithdrawRequestModules,
+} from './withdrawRequest.interface';
 
 const withdrawRequestSchema = new Schema<IWithdrawRequest>(
   {
-    isDeleted: { type: 'boolean', default: false },
+    vendor: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending',
+    },
+    region: {
+      type: String,
+    },
+    bankDetails: {
+      type: Schema.Types.ObjectId,
+      ref: 'BankDetails',
+      required: true,
+    },
   },
   {
     timestamps: true,
-  }
-);
-
-//withdrawRequestSchema.pre('find', function (next) {
-//  //@ts-ignore
-//  this.find({ isDeleted: { $ne: true } });
-//  next();
-//});
-
-//withdrawRequestSchema.pre('findOne', function (next) {
-  //@ts-ignore
-  //this.find({ isDeleted: { $ne: true } });
- // next();
-//});
-
-withdrawRequestSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
-  next();
-});
+  },
+); 
 
 const WithdrawRequest = model<IWithdrawRequest, IWithdrawRequestModules>(
   'WithdrawRequest',
-  withdrawRequestSchema
+  withdrawRequestSchema,
 );
 export default WithdrawRequest;
