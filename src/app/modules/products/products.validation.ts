@@ -1,38 +1,51 @@
 import { z } from 'zod';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+
+const imageFileSchema = z
+  .instanceof(File)
+  .refine(file => file.size <= MAX_FILE_SIZE, {
+    message: 'Image size must be less than 5MB.',
+  })
+  .refine(file => allowedMimeTypes.includes(file.type), {
+    message: 'Only JPG, JPEG, PNG, and WEBP image formats are allowed.',
+  });
 
 const createProductSchema = z.object({
-  images: z
-    .array(
-      z.object({
-        key: z.string().min(1, { message: 'Image key is required' }),
-        url: z
-          .string()
-          .url({ message: 'Invalid URL format' })
-          .min(1, { message: 'Image URL is required' }),
-      }),
-    )
-    .min(1, { message: 'At least one image is required' }),
+  // files: z.object({
+  //   images: z
+  //     .array(imageFileSchema)
+  //     .min(1, { message: 'At least one image is required.' }),
+  // }),
 
-  name: z.string().min(1, { message: 'Product name is required' }),
+  body: z.object({
+    name: z.string().min(1, { message: 'Product name is required.' }),
 
-  details: z.string().min(1, { message: 'Product details are required' }),
+    details: z.string().min(1, { message: 'Product details are required.' }),
 
-  category: z.string().min(1, { message: 'Category is required' }),
+    category: z.string().min(1, { message: 'Category is required.' }),
 
-  price: z.number().min(0, { message: 'Price must be a positive number' }),
+    price: z.number().min(0, { message: 'Price must be a positive number.' }),
 
-  quantity: z.string().min(1, { message: 'Quantity is required' }),
+    quantity: z.number().min(1, { message: 'Quantity is required.' }),
 
-  expiredAt: z.string().min(1, { message: 'Expiry date is required' }),
+    expiredAt: z.string().min(1, { message: 'Expiry date is required.' }),
 
-  discount: z.number().optional(),
+    discount: z.number().optional(),
 
-  isDeleted: z.boolean().default(false),
+    discountPerDayIncise: z.number().optional(),
+  }),
 });
 
-const updateProductSchema = createProductSchema.deepPartial(); // Allow partial updates
+const updateProductSchema = z.object({
+  // files: z
+  //   .object({
+  //     images: z.array(imageFileSchema).optional(),
+  //   })
+  //   .optional(),
+  body: createProductSchema.shape.body.deepPartial(),
+});
 
 export const productValidation = {
   createProductSchema,

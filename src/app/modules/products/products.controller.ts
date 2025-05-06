@@ -2,10 +2,9 @@ import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import { productsService } from './products.service';
 import sendResponse from '../../utils/sendResponse';
-import { storeFile } from '../../utils/fileHelper';
-import { uploadToS3 } from '../../utils/s3';
 
 const createProducts = catchAsync(async (req: Request, res: Response) => {
+  req.body.author = req.user.userId;
   const result = await productsService.createProducts(req.body, req.files);
   sendResponse(res, {
     statusCode: 201,
@@ -25,7 +24,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 const getMyProducts = catchAsync(async (req: Request, res: Response) => {
-  req.query.user = req.user.userId;
+  req.query.author = req.user.userId;
   const result = await productsService.getAllProducts(req.query);
   sendResponse(res, {
     statusCode: 200,
