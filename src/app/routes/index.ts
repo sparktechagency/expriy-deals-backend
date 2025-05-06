@@ -8,6 +8,7 @@ import { paymentsRoutes } from '../modules/payments/payments.route';
 import { categoryRoutes } from '../modules/category/category.route';
 import { productsRoutes } from '../modules/products/products.route';
 import { orderRoutes } from '../modules/order/order.route';
+import { bankDetailsRoutes } from '../modules/bankDetails/bankDetails.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -46,6 +47,10 @@ const moduleRoutes = [
   {
     path: '/contents',
     route: contentsRoutes,
+  },
+  {
+    path: '/bank-details',
+    route: bankDetailsRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
