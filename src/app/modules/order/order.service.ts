@@ -3,8 +3,22 @@ import { IOrder } from './order.interface';
 import Order from './order.models';
 import AppError from '../../error/AppError';
 import QueryBuilder from '../../class/builder/QueryBuilder';
+import Products from '../products/products.models';
+import { IProducts } from '../products/products.interface';
 
 const createOrder = async (payload: IOrder) => {
+  const product: IProducts | null = await Products.findById(payload?.product);
+  if (!product) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Product is not found!');
+  }
+
+  payload.author = product?.author;
+  payload.totalPrice =
+    product?.price *
+    (1 - Number(product?.discount ?? 0) / 100) *
+    payload?.quantity;
+
+  payload.discount = Number(product?.discount);
   const result = await Order.create(payload);
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create order');

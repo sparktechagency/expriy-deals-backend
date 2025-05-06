@@ -18,15 +18,37 @@ const productsSchema = new Schema<IProducts>(
       ref: 'User',
       required: [true, 'Product author is required'],
     },
-    name: { type: String, required: [true, 'Product name is required'] },
+    name: {
+      type: String,
+      required: [true, 'Product name is required'],
+    },
     details: { type: String, required: [true, 'Product details are required'] },
-    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
-    price: { type: Number, required: [true, 'Price is required'], min: 0 },
-    quantity: { type: Number, required: [true, 'Quantity is required'] },
-    expiredAt: { type: String, required: [true, 'Expiry date is required'] },
-    discount: { type: Number, default: 0 },
-    discountPerDayIncise: { type: Number, default: 0 },
-    isDeleted: { type: 'boolean', default: false },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: 'Categories',
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: [true, 'Price is required'],
+      min: 0,
+    },
+    quantity: {
+      type: Number,
+      required: [true, 'Quantity is required'],
+    },
+    expiredAt: {
+      type: String,
+      required: [true, 'Expiry date is required'],
+    },
+    discount: {
+      type: Number,
+      default: 0,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

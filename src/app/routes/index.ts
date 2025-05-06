@@ -7,6 +7,7 @@ import { contentsRoutes } from '../modules/contents/contents.route';
 import { paymentsRoutes } from '../modules/payments/payments.route';
 import { categoryRoutes } from '../modules/category/category.route';
 import { productsRoutes } from '../modules/products/products.route';
+import { orderRoutes } from '../modules/order/order.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -27,12 +28,16 @@ const moduleRoutes = [
     route: notificationRoutes,
   },
   {
+    path: '/categories',
+    route: categoryRoutes,
+  },
+  {
     path: '/products',
     route: productsRoutes,
   },
   {
-    path: '/categories',
-    route: categoryRoutes,
+    path: '/orders',
+    route: orderRoutes,
   },
   {
     path: '/payments',

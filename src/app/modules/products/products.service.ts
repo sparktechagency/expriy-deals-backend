@@ -34,7 +34,10 @@ const createProducts = async (payload: IProducts, files: any) => {
 
 const getAllProducts = async (query: Record<string, any>) => {
   const productsModel = new QueryBuilder(
-    Products.find({ isDeleted: false }),
+    Products.find({ isDeleted: false }).populate([
+      { path: 'author', select: 'name email profile phoneNumber' },
+      { path: 'category', select: 'name banner' },
+    ]),
     query,
   )
     .search(['name'])
@@ -53,7 +56,10 @@ const getAllProducts = async (query: Record<string, any>) => {
 };
 
 const getProductsById = async (id: string) => {
-  const result = await Products.findById(id);
+  const result = await Products.findById(id).populate([
+    { path: 'author', select: 'name email profile phoneNumber' },
+    { path: 'category', select: 'name banner' },
+  ]);
   if (!result || result?.isDeleted) {
     throw new Error('Products not found!');
   }

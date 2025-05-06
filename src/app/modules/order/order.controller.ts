@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import { orderService } from './order.service';
-import sendResponse from '../../utils/sendResponse'; 
+import sendResponse from '../../utils/sendResponse';
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
   req.body.user = req.user?.userId;
@@ -23,6 +23,16 @@ const getAllOrder = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getMyOrders = catchAsync(async (req: Request, res: Response) => {
+  req.query.user = req.user.userId;
+  const result = await orderService.getAllOrder(req.query);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'My order fetched successfully',
+    data: result,
+  });
+});
 
 const getOrderById = catchAsync(async (req: Request, res: Response) => {
   const result = await orderService.getOrderById(req.params.id);
@@ -33,6 +43,7 @@ const getOrderById = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 const updateOrder = catchAsync(async (req: Request, res: Response) => {
   const result = await orderService.updateOrder(req.params.id, req.body);
   sendResponse(res, {
@@ -59,4 +70,5 @@ export const orderController = {
   getOrderById,
   updateOrder,
   deleteOrder,
+  getMyOrders,
 };
