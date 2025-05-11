@@ -1,6 +1,7 @@
 import { Model, ObjectId } from 'mongoose';
 
 export interface IBankDetails {
+  _id: ObjectId | string;
   vendor: ObjectId;
   accountNumber: string;
   routingNumber: string;

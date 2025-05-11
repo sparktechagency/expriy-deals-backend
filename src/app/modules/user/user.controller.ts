@@ -57,6 +57,7 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyProfile = catchAsync(async (req: Request, res: Response) => {
+  console.log(req);
   const result = await userService.geUserById(req?.user?.userId);
   sendResponse(res, {
     statusCode: httpStatus.OK,

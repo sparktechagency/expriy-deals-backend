@@ -2,7 +2,7 @@ import { model, Schema } from 'mongoose';
 import {
   IWithdrawRequest,
   IWithdrawRequestModules,
-} from './withdrawRequest.interface';
+} from './withdrawRequest.interface'; 
 
 const withdrawRequestSchema = new Schema<IWithdrawRequest>(
   {
@@ -23,6 +23,10 @@ const withdrawRequestSchema = new Schema<IWithdrawRequest>(
     },
     region: {
       type: String,
+    },
+    isDeleted:{
+      type:Boolean,
+      default:false
     },
     bankDetails: {
       type: Schema.Types.ObjectId,
