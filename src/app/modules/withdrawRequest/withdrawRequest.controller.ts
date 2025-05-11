@@ -70,6 +70,35 @@ const updateWithdrawRequest = catchAsync(
   },
 );
 
+const approvedWithdrawRequest = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await withdrawRequestService.approvedWithdrawRequest(
+      req.params.id,
+    );
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Approved withdraw request successfully',
+      data: result,
+    });
+  },
+);
+
+const rejectWithdrawRequest = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await withdrawRequestService.rejectWithdrawRequest(
+      req.params.id,
+      req.body,
+    );
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Reject withdraw request successfully',
+      data: result,
+    });
+  },
+);
+
 const deleteWithdrawRequest = catchAsync(
   async (req: Request, res: Response) => {
     const result = await withdrawRequestService.deleteWithdrawRequest(
@@ -91,4 +120,6 @@ export const withdrawRequestController = {
   updateWithdrawRequest,
   deleteWithdrawRequest,
   myWithdrawRequest,
+  rejectWithdrawRequest,
+  approvedWithdrawRequest,
 };

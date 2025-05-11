@@ -8,6 +8,9 @@ import { IBankDetails } from '../bankDetails/bankDetails.interface';
 import { ObjectId } from 'mongoose';
 import { User } from '../user/user.models';
 import { IUser } from '../user/user.interface';
+import { notificationServices } from '../notification/notification.service';
+import { USER_ROLE } from '../user/user.constants';
+import { modeType } from '../notification/notification.interface';
 
 const createWithdrawRequest = async (payload: IWithdrawRequest) => {
   const bankDetails: IBankDetails | null = await BankDetails.findByVendorId(
@@ -20,8 +23,9 @@ const createWithdrawRequest = async (payload: IWithdrawRequest) => {
       "You don't have Bank detail. first add bank details then try again",
     );
   }
+
   const user: IUser | null = await User.findById(payload?.vendor);
-  if (!user) throw new AppError(httpStatus.BAD_REQUEST, 'vendor not found');
+  if (!user) throw new AppError(httpStatus.NOT_FOUND, 'vendor not found');
 
   if (Number(payload?.amount) > Number(user?.balance)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Insufficient balance');
@@ -36,6 +40,14 @@ const createWithdrawRequest = async (payload: IWithdrawRequest) => {
       'Failed to create withdrawRequest',
     );
   }
+  const admin = await User.findOne({ role: USER_ROLE.admin });
+  await notificationServices.insertNotificationIntoDb({
+    receiver: admin?._id,
+    message: 'New Withdrawal Request Submitted',
+    description: `A new withdrawal request has been submitted by ${user?.name ?? 'a user'} for the amount of $${result?.amount ?? 'N/A'}.`,
+    refference: result?._id,
+    model_type: modeType.WithdrawRequest,
+  });
   return result;
 };
 
@@ -98,6 +110,59 @@ const updateWithdrawRequest = async (
   }
   return result;
 };
+const approvedWithdrawRequest = async (id: string) => {
+  const result = await WithdrawRequest.findByIdAndUpdate(
+    id,
+    { status: 'approved' },
+    {
+      new: true,
+    },
+  );
+  if (!result) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Failed to update WithdrawRequest',
+    );
+  }
+
+  await notificationServices.insertNotificationIntoDb({
+    receiver: result?.vendor,
+    message: 'Withdrawal Request Approved',
+    description: `Your withdrawal request of $${result?.amount || 'N/A'} has been approved and is being processed.`,
+    refference: result?._id,
+    model_type: modeType.WithdrawRequest,
+  });
+
+  return result;
+};
+const rejectWithdrawRequest = async (
+  id: string,
+  payload: Partial<IWithdrawRequest>,
+) => {
+  const result = await WithdrawRequest.findByIdAndUpdate(
+    id,
+    { status: 'rejected', region: payload?.region },
+    {
+      new: true,
+    },
+  );
+  if (!result) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Failed to update WithdrawRequest',
+    );
+  }
+
+  await notificationServices.insertNotificationIntoDb({
+    receiver: result?.vendor,
+    message: 'Withdrawal Request Rejected',
+    description: `Your withdrawal request of $${result?.amount || 'N/A'} has been rejected by the admin.`,
+    refference: result?._id,
+    model_type: modeType.WithdrawRequest,
+  });
+
+  return result;
+};
 
 const deleteWithdrawRequest = async (id: string) => {
   const result = await WithdrawRequest.findByIdAndUpdate(
@@ -121,4 +186,6 @@ export const withdrawRequestService = {
   updateWithdrawRequest,
   deleteWithdrawRequest,
   myWithdrawRequest,
+  rejectWithdrawRequest,
+  approvedWithdrawRequest,
 };
