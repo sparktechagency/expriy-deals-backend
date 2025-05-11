@@ -29,6 +29,16 @@ const getAllWithdrawRequest = catchAsync(
     });
   },
 );
+const getMyWithdrawRequest = catchAsync(async (req: Request, res: Response) => {
+  req.query['vendor'] = req.user.userId;
+  const result = await withdrawRequestService.getAllWithdrawRequest(req.query);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'All withdrawRequest fetched successfully',
+    data: result,
+  });
+});
 
 const myWithdrawRequest = catchAsync(async (req: Request, res: Response) => {
   const result = await withdrawRequestService.myWithdrawRequest(
@@ -122,4 +132,5 @@ export const withdrawRequestController = {
   myWithdrawRequest,
   rejectWithdrawRequest,
   approvedWithdrawRequest,
+  getMyWithdrawRequest,
 };

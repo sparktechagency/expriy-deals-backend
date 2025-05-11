@@ -38,13 +38,18 @@ router.delete(
   withdrawRequestController.deleteWithdrawRequest,
 );
 router.get(
+  '/my-request',
+  auth(USER_ROLE.vendor),
+  withdrawRequestController.getMyWithdrawRequest,
+);
+router.get(
   '/:id',
   auth(USER_ROLE.admin, USER_ROLE.vendor),
   withdrawRequestController.getWithdrawRequestById,
 );
 router.get(
   '/',
-  auth(USER_ROLE.admin, USER_ROLE.vendor),
+  auth(USER_ROLE.admin),
   withdrawRequestController.getAllWithdrawRequest,
 );
 
