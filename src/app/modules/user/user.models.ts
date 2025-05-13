@@ -27,8 +27,7 @@ const userSchema: Schema<IUser> = new Schema(
 
     phoneNumber: {
       type: String,
-      required: true,
-      unique: true,
+      required: false,
       default: null,
     },
 

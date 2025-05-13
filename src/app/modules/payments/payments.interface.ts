@@ -9,6 +9,13 @@ export interface IPayments {
   trnId: string;
   price: number;
   isDeleted: boolean;
+  cardInfo: {
+    cardNumber: string;
+    expiryDate: string;
+    cardCode: string;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export type IPaymentsModules = Model<IPayments, Record<string, unknown>>;

@@ -90,13 +90,12 @@ class AuthPaymentService {
       const transactionRequest =
         new authorizenet.APIContracts.TransactionRequestType();
       transactionRequest.setTransactionType(
-        authorizenet.APIContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION, // Use AUTHONLYTRANSACTION if only authorizing
+        authorizenet.APIContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION,
       );
-      transactionRequest.setAmount(amount.toFixed(2)); // Amount needs to be a string with 2 decimals
+      transactionRequest.setAmount(amount.toFixed(2));
       transactionRequest.setPayment(paymentType);
-      transactionRequest.setCurrencyCode('CHF'); // Use USD for sandbox testing
+      transactionRequest.setCurrencyCode('CHF');
       transactionRequest.setBillTo(billTo);
-      transactionRequest.setRefTransId('Niloy232');
 
       // Create the controller request
       const createRequest =
@@ -104,77 +103,57 @@ class AuthPaymentService {
       createRequest.setMerchantAuthentication(this.merchantAuthentication);
       createRequest.setTransactionRequest(transactionRequest);
 
-      // Execute transaction
       const ctrl = new authorizenet.APIControllers.CreateTransactionController(
         createRequest.getJSON(),
       );
-      ctrl.setEnvironment(this.environment); // Set environment explicitly
+      ctrl.setEnvironment(this.environment);
 
       const response =
         await new Promise<authorizenet.APIContracts.CreateTransactionResponse>(
           (resolve, reject) => {
             ctrl.execute(() => {
-              const rawResponse = ctrl.getResponse(); // raw JSON object
-              console.log('Raw Response from Authorize.Net:', rawResponse); // Log the raw response
-
+              const rawResponse = ctrl.getResponse();
               if (rawResponse) {
                 const apiResponse =
                   new authorizenet.APIContracts.CreateTransactionResponse(
                     rawResponse,
                   );
-                resolve(apiResponse); // Properly resolve the response
+                resolve(apiResponse);
               } else {
-                console.error('No response from Authorize.Net');
                 reject(new Error('No response from Authorize.Net'));
               }
             });
           },
         );
 
-      // Check if the response contains the transaction response
       if (!response || !response.getTransactionResponse()) {
-        console.error('Invalid response or missing transaction response');
         throw new Error('Invalid response from Authorize.Net');
       }
 
       const transactionResponse = response.getTransactionResponse();
+      const resultCode = response.getMessages()?.getResultCode();
 
-      // Check the resultCode for errors
-      const resultCode = response.getMessages().getResultCode();
-      if (resultCode === 'Error') {
-        const errorMessages = response.getMessages().getMessage();
-        // Log the specific error message(s)
+      if (resultCode !== 'Ok') {
+        const errorMessages = response.getMessages()?.getMessage();
         const errors =
-          errorMessages
-            ?.map((m: { getText: () => any }) => m.getText())
-            .join(', ') || 'Unknown error';
-
-        console.error('Transaction failed with errors:', errors);
+          errorMessages?.map((m: any) => m.getText()).join(', ') ||
+          'Unknown error';
         throw new Error(`Payment failed: ${errors}`);
       }
 
-      // Log the transaction response
-      console.log('Transaction Response:', transactionResponse);
-
-      // Check if transaction is successful
       if (transactionResponse.getResponseCode() === '1') {
         return {
-          ...transactionResponse,
+          transactionId: transactionResponse.getTransId(),
+          authCode: transactionResponse.getAuthCode(),
         };
       } else {
-        // Log detailed errors for better diagnostics
         const errors = transactionResponse
           .getErrors()
           ?.getError()
-          ?.map((e: { getErrorText: () => any }) => e.getErrorText()) || [
-          'Unknown error',
-        ];
-
-        console.error('Transaction failed with errors:', errors);
-        throw new Error(`Payment failed: ${errors.join(', ')}`);
+          ?.map((e: any) => e.getErrorText()) || ['Unknown error'];
+        throw new Error(`Transaction failed: ${errors.join(', ')}`);
       }
     } catch (error: any) {
-      // Log the error to help identify the issue
       console.error('Create charge error:', error);
       throw new Error(`Payment processing failed: ${error.message}`);
     }

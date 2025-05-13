@@ -4,6 +4,8 @@ import Payments from './payments.models';
 import AppError from '../../error/AppError';
 import QueryBuilder from '../../class/builder/QueryBuilder';
 import AuthPaymentService from '../../class/Auth.net/Auth.net';
+import Order from '../order/order.models';
+import { startSession } from 'mongoose';
 const paymentService = new AuthPaymentService();
 interface PaymentRequest {
   amount: number;
@@ -15,21 +17,75 @@ interface PaymentRequest {
 }
 
 const createPayments = async (payload: IPayments) => {
-  const data: PaymentRequest = {
-    amount: 200,
-    cardNumber: '4111111111111111',
-    expiryDate: '12/25',
-    cardCode: '123',
-    firstName: 'John',
-    lastName: 'Doe',
-  };
-  const result = await paymentService.createCharge(data);
-  // const result = await Payments.create(payload);
-  // if (!result) {
-  //   throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create payments');
-  // }
-  // console.log(result);
-  return result;
+  let result;
+  const session = await startSession();
+  session.startTransaction();
+
+  try {
+    const order = await Order.findById(payload?.order).session(session);
+    if (!order) throw new AppError(httpStatus.NOT_FOUND, 'Order not found!');
+
+    const data = {
+      amount: payload?.price,
+      cardNumber: payload?.cardInfo?.cardNumber,
+      expiryDate: payload?.cardInfo?.expiryDate,
+      cardCode: payload?.cardInfo?.cardCode,
+      firstName: payload?.cardInfo?.firstName,
+      lastName: payload?.cardInfo?.lastName,
+    };
+
+    result = await paymentService.createCharge(data);
+
+    if (result.transactionId === '0' && result.authCode === '000000') {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'Payment failed. No transaction processed.',
+      );
+    }
+
+    const paymentRecord = await Payments.create(
+      [
+        {
+          user: order?.user,
+          order: order._id,
+          author: order?.author,
+          status: 'paid',
+          deliveryStatus: 'ongoing',
+          trnId: result.transactionId,
+          price: payload.price,
+        },
+      ],
+      { session },
+    );
+
+    await session.commitTransaction();
+    return paymentRecord[0];
+  } catch (error: any) {
+    await session.abortTransaction();
+
+    // Attempt refund if transaction was successful but saving failed
+    if (
+      result?.transactionId !== '0' &&
+      result?.authCode !== '000000' &&
+      payload?.price &&
+      payload?.cardInfo
+    ) {
+      try {
+        await paymentService.refund({
+          amount: payload.price,
+          cardNumber: payload.cardInfo.cardNumber.slice(-4),
+
+          transactionId: result?.transactionId as string,
+        });
+      } catch (refundError: any) {
+        console.error('Refund failed:', refundError.message);
+      }
+    }
+
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 const getAllPayments = async (query: Record<string, any>) => {
