@@ -17,6 +17,9 @@ import { IUser } from '../user/user.interface';
 import { User } from '../user/user.models';
 import path from 'path';
 import fs from 'fs';
+import { Login_With, USER_ROLE } from '../user/user.constants';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import firebaseAdmin from '../../utils/firebase';
 
 // Login
 const login = async (payload: TLogin) => {
@@ -28,7 +31,12 @@ const login = async (payload: TLogin) => {
   if (user?.isDeleted) {
     throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted');
   }
-
+  if (user.loginWth !== Login_With.credentials) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      `This user create his account with ${user.loginWth}.`,
+    );
+  }
   if (!(await User.isPasswordMatched(payload.password, user.password))) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Password does not match');
   }
@@ -124,30 +132,23 @@ const forgotPassword = async (email: string) => {
     verification: {
       otp,
       expiresAt,
+      status: true,
     },
   });
 
-    const otpEmailPath = path.join(
-      __dirname,
-      '../../../../public/view/forgot_pass_mail.html',
-    );
+  const otpEmailPath = path.join(
+    __dirname,
+    '../../../../public/view/forgot_pass_mail.html',
+  );
 
-    await sendEmail(
-      user?.email,
-      'Your reset password OTP is',
-      fs
-        .readFileSync(otpEmailPath, 'utf8')
-        .replace('{{otp}}', otp)
-        .replace('{{email}}', user?.email),
-    );
-    
-  // await sendEmail(
-  //   email,
-  //   'Your reset password OTP is:',
-  //   `<div><h5>Your OTP is: ${otp}</h5>
-  //   <p>Valid until: ${expiresAt.toLocaleString()}</p>
-  //   </div>`,
-  // );
+  await sendEmail(
+    user?.email,
+    'Your reset password OTP is',
+    fs
+      .readFileSync(otpEmailPath, 'utf8')
+      .replace('{{otp}}', otp)
+      .replace('{{email}}', user?.email),
+  );
 
   return { email, token };
 };
@@ -236,10 +237,119 @@ const refreshToken = async (token: string) => {
   };
 };
 
+const googleLogin = async (payload: any) => {
+  try {
+    const decodedToken: DecodedIdToken | null = await firebaseAdmin
+      .auth()
+      .verifyIdToken(payload?.token);
+    console.log(JSON.stringify(decodedToken));
+    if (!decodedToken)
+      throw new AppError(httpStatus.BAD_REQUEST, 'Invalid token');
+
+    if (!decodedToken?.email_verified) {
+      throw new AppError(
+        httpStatus?.BAD_REQUEST,
+        'your mail not verified from google',
+      );
+    }
+    const isExist: IUser | null = await User.isUserExist(
+      decodedToken.email as string,
+    );
+    if (isExist) {
+      if (isExist?.status !== 'active')
+        throw new AppError(httpStatus.FORBIDDEN, 'This account is Blocked');
+      if (
+        isExist?.loginWth ===
+        (Login_With.credentials || Login_With.facebook || Login_With.apple)
+      )
+        throw new AppError(
+          httpStatus.FORBIDDEN,
+          `This account in not registered with google login. try it ${isExist?.loginWth}`,
+        );
+
+      if (isExist?.isDeleted)
+        throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted');
+
+      if (!isExist?.verification?.status) {
+        throw new AppError(
+          httpStatus.FORBIDDEN,
+          'User account is not verified',
+        );
+      }
+
+      const jwtPayload: { userId: string; role: string } = {
+        userId: isExist?._id?.toString() as string,
+        role: isExist?.role,
+      };
+
+      const accessToken = createToken(
+        jwtPayload,
+        config.jwt_access_secret as string,
+        config.jwt_access_expires_in as string,
+      );
+
+      const refreshToken = createToken(
+        jwtPayload,
+        config.jwt_refresh_secret as string,
+        config.jwt_refresh_expires_in as string,
+      );
+
+      return {
+        user: isExist,
+        accessToken,
+        refreshToken,
+      };
+    }
+    const user = await User.create({
+      name: decodedToken?.name,
+      expireAt: null,
+      email: decodedToken?.email,
+      profile: decodedToken?.picture,
+      phoneNumber: decodedToken?.phone_number,
+      role: payload?.role ?? USER_ROLE.user,
+      loginWth: Login_With.google,
+      'verification.status': true,
+    });
+
+    if (!user)
+      throw new AppError(
+        httpStatus?.BAD_REQUEST,
+        'user account creation failed',
+      );
+    const jwtPayload: { userId: string; role: string } = {
+      userId: user?._id?.toString() as string,
+      role: user?.role,
+    };
+
+    const accessToken = createToken(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      config.jwt_access_expires_in as string,
+    );
+
+    const refreshToken = createToken(
+      jwtPayload,
+      config.jwt_refresh_secret as string,
+      config.jwt_refresh_expires_in as string,
+    );
+    return {
+      user: user,
+      accessToken,
+      refreshToken,
+    };
+  } catch (error: any) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      error?.message ?? 'Login failed Server Error',
+    );
+  }
+};
+
 export const authServices = {
   login,
   changePassword,
   forgotPassword,
   resetPassword,
   refreshToken,
+  googleLogin,
 };

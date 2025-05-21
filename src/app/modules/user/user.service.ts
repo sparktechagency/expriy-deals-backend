@@ -39,15 +39,7 @@ const createUser = async (payload: IUser): Promise<IUser> => {
     );
   }
 
-  if (payload?.isGoogleLogin) {
-    payload.verification = {
-      otp: 0,
-      expiresAt: new Date(Date.now()),
-      status: true,
-    };
-  }
-
-  if (!payload.isGoogleLogin && !payload.password) {
+  if (!payload.password) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Password is required');
   }
 

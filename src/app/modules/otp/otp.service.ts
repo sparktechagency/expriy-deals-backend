@@ -47,6 +47,7 @@ const verifyOtp = async (token: string, otp: string | number) => {
   const updateUser = await User.findByIdAndUpdate(
     user?._id,
     {
+      expireAt: null,
       $set: {
         verification: {
           otp: 0,
@@ -109,20 +110,19 @@ const resendOtp = async (email: string) => {
     expiresIn: '3m',
   });
 
-    const otpEmailPath = path.join(
-      __dirname,
-      '../../../../public/view/otp_mail.html',
-    );
+  const otpEmailPath = path.join(
+    __dirname,
+    '../../../../public/view/otp_mail.html',
+  );
 
-    await sendEmail(
-      user?.email,
-      'Your One Time OTP',
-      fs
-        .readFileSync(otpEmailPath, 'utf8')
-        .replace('{{otp}}', otp)
-        .replace('{{email}}', user?.email),
-    );
-
+  await sendEmail(
+    user?.email,
+    'Your One Time OTP',
+    fs
+      .readFileSync(otpEmailPath, 'utf8')
+      .replace('{{otp}}', otp)
+      .replace('{{email}}', user?.email),
+  );
 
   // await sendEmail(
   //   user?.email,

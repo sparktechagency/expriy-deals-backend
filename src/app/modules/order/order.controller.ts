@@ -33,6 +33,16 @@ const getMyOrders = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getMyShopOrders = catchAsync(async (req: Request, res: Response) => {
+  req.query['author'] = req.user.userId;
+  const result = await orderService.getAllOrder(req.query);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'My order fetched successfully',
+    data: result,
+  });
+});
 
 const getOrderById = catchAsync(async (req: Request, res: Response) => {
   const result = await orderService.getOrderById(req.params.id);
@@ -71,4 +81,5 @@ export const orderController = {
   updateOrder,
   deleteOrder,
   getMyOrders,
+  getMyShopOrders,
 };

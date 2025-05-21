@@ -14,7 +14,8 @@ export interface IUser {
   document: string;
   role: string;
   balance: number;
-  isGoogleLogin: boolean;
+  loginWth: 'google' | 'apple' | 'facebook' | 'credentials';
+  expireAt: Date;
   address?: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;

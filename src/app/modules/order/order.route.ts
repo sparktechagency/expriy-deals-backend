@@ -13,6 +13,7 @@ router.delete(
   orderController.deleteOrder,
 );
 router.get('/my-orders', auth(USER_ROLE.user), orderController.getMyOrders);
+router.get('/my-shop-orders', auth(USER_ROLE.user), orderController.getMyShopOrders);
 // router.get('/order-request', orderController.getOrderById);
 router.get('/:id', orderController.getOrderById);
 router.get(

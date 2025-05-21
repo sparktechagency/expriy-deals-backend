@@ -26,8 +26,9 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
       });
     }
   }
-  const result = await userService.createUser(req.body);
+  const result = await userService.createUser(req.body); 
   const sendOtp = await otpServices.resendOtp(result?.email);
+   
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

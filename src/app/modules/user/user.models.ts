@@ -2,7 +2,7 @@ import { Error, Query, Schema, model } from 'mongoose';
 import config from '../../config';
 import bcrypt from 'bcrypt';
 import { IUser, UserModel } from './user.interface';
-import { Role, USER_ROLE } from './user.constants';
+import { Login_With, Role, USER_ROLE } from './user.constants';
 
 const userSchema: Schema<IUser> = new Schema(
   {
@@ -47,11 +47,20 @@ const userSchema: Schema<IUser> = new Schema(
       default: null,
     },
 
-    isGoogleLogin: {
-      type: Boolean,
-      default: false,
+    loginWth: {
+      type: String,
+      enum: Login_With,
+      default: Login_With.credentials,
     },
+    expireAt: {
+      type: Date,
+      default: () => {
+        const expireAt = new Date();
 
+        // return expireAt.setHours(expireAt.getHours() + 48);
+        return expireAt.setMinutes(expireAt.getMinutes() + 20);
+      },
+    },
     profile: {
       type: String,
       default: null,
@@ -106,12 +115,13 @@ const userSchema: Schema<IUser> = new Schema(
 userSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
-  if (!user?.isGoogleLogin) {
+  if (user.loginWth === Login_With.credentials) {
     user.password = await bcrypt.hash(
       user.password,
       Number(config.bcrypt_salt_rounds),
     );
   }
+
   next();
 });
 
@@ -124,7 +134,7 @@ userSchema.post(
     next();
   },
 );
-
+userSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 userSchema.statics.isUserExist = async function (email: string) {
   return await User.findOne({ email: email }).select('+password');
 };
