@@ -1,7 +1,9 @@
-import { Model, Types } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
+import { IShop } from '../shop/shop.interface';
 
 export interface IUser {
   _id?: Types.ObjectId;
+  shop: ObjectId | IShop;
   status: string;
   name: string;
   email: string;
@@ -17,6 +19,10 @@ export interface IUser {
   loginWth: 'google' | 'apple' | 'facebook' | 'credentials';
   expireAt: Date;
   address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;
   isDeleted: boolean;

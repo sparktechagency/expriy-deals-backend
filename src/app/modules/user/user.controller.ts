@@ -26,9 +26,9 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
       });
     }
   }
-  const result = await userService.createUser(req.body); 
+  const result = await userService.createUser(req.body);
   const sendOtp = await otpServices.resendOtp(result?.email);
-   
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -58,7 +58,6 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyProfile = catchAsync(async (req: Request, res: Response) => {
-  console.log(req);
   const result = await userService.geUserById(req?.user?.userId);
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -69,24 +68,11 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateUser = catchAsync(async (req: Request, res: Response) => {
-  await User.findById(req.params.id);
-
-  if (req.files) {
-    const { profile, document } = req.files as UploadedFiles;
-
-    if (profile) {
-      req.body.profile = await uploadToS3({
-        file: profile[0],
-        fileName: `images/user/profile/${Math.floor(100000 + Math.random() * 900000)}`,
-      });
-    }
-
-    if (document) {
-      req.body.document = await uploadToS3({
-        file: document[0],
-        fileName: `images/user/documents/${Math.floor(100000 + Math.random() * 900000)}`,
-      });
-    }
+  if (req.file) {
+    req.body.profile = await uploadToS3({
+      file: req.file,
+      fileName: `images/user/profile/${Math.floor(100000 + Math.random() * 900000)}`,
+    });
   }
   const result = await userService.updateUser(req.params.id, req.body);
   sendResponse(res, {
@@ -98,22 +84,11 @@ const updateUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
-  if (req.files) {
-    const { profile, document } = req.files as UploadedFiles;
-
-    if (profile) {
-      req.body.profile = await uploadToS3({
-        file: profile[0],
-        fileName: `images/user/profile/${Math.floor(100000 + Math.random() * 900000)}`,
-      });
-    }
-
-    if (document) {
-      req.body.document = await uploadToS3({
-        file: document[0],
-        fileName: `images/user/documents/${Math.floor(100000 + Math.random() * 900000)}`,
-      });
-    }
+  if (req.file) {
+    req.body.profile = await uploadToS3({
+      file: req.file,
+      fileName: `images/user/profile/${Math.floor(100000 + Math.random() * 900000)}`,
+    });
   }
   const result = await userService.updateUser(req?.user?.userId, req.body);
   sendResponse(res, {

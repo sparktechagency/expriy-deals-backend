@@ -18,6 +18,11 @@ const userSchema: Schema<IUser> = new Schema(
       default: null,
     },
 
+    shop: {
+      type: Schema.Types.ObjectId,
+      ref: 'Shop',
+      default: null,
+    },
     email: {
       type: String,
       required: true,
@@ -76,6 +81,22 @@ const userSchema: Schema<IUser> = new Schema(
     },
 
     address: {
+      type: String,
+      default: null,
+    },
+    city: {
+      type: String,
+      default: null,
+    },
+    state: {
+      type: String,
+      default: null,
+    },
+    country: {
+      type: String,
+      default: null,
+    },
+    zipCode: {
       type: String,
       default: null,
     },
