@@ -6,7 +6,7 @@ interface IImages {
 }
 export interface IProducts {
   images: IImages[];
-  author: ObjectId;
+  author: ObjectId; 
   name: string;
   details: string;
   category: ObjectId | ICategory;

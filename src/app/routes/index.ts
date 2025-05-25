@@ -10,6 +10,7 @@ import { productsRoutes } from '../modules/products/products.route';
 import { orderRoutes } from '../modules/order/order.route';
 import { bankDetailsRoutes } from '../modules/bankDetails/bankDetails.route';
 import { withdrawRequestRoutes } from '../modules/withdrawRequest/withdrawRequest.route';
+import { shopRoutes } from '../modules/shop/shop.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -56,6 +57,10 @@ const moduleRoutes = [
   {
     path: '/withdraw-request',
     route: withdrawRequestRoutes,
+  },
+  {
+    path: '/shop',
+    route: shopRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
