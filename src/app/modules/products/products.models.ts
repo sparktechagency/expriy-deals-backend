@@ -33,9 +33,13 @@ const productsSchema = new Schema<IProducts>(
       required: [true, 'Price is required'],
       min: 0,
     },
-    quantity: {
+    totalSell: {
       type: Number,
-      required: [true, 'Quantity is required'],
+      default: 0,
+    },
+    stock: {
+      type: Number,
+      required: [true, 'stock is required'],
     },
     expiredAt: {
       type: String,

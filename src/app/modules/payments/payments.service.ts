@@ -6,6 +6,7 @@ import QueryBuilder from '../../class/builder/QueryBuilder';
 import AuthPaymentService from '../../class/Auth.net/Auth.net';
 import Order from '../order/order.models';
 import { startSession } from 'mongoose';
+import Products from '../products/products.models';
 const paymentService = new AuthPaymentService();
 interface PaymentRequest {
   amount: number;
@@ -57,7 +58,13 @@ const createPayments = async (payload: IPayments) => {
       ],
       { session },
     );
-
+    await Products.findByIdAndUpdate(
+      order?.product,
+      {
+        $inc: { totalSell: 1, quantity: -1 },
+      },
+      { session },
+    );
     await session.commitTransaction();
     return paymentRecord[0];
   } catch (error: any) {

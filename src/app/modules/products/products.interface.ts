@@ -11,7 +11,8 @@ export interface IProducts {
   details: string;
   category: ObjectId | ICategory;
   price: number;
-  quantity: number;
+  totalSell: number;
+  stock: number;
   expiredAt: string;
   discount: number;
   discountPerDayIncise: number;
