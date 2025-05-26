@@ -5,7 +5,6 @@ import AppError from '../../error/AppError';
 import QueryBuilder from '../../class/builder/QueryBuilder';
 
 const createAddToCard = async (payload: IAddToCard) => {
-  
   const result = await AddToCard.create(payload);
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create addToCard');
@@ -14,7 +13,23 @@ const createAddToCard = async (payload: IAddToCard) => {
 };
 
 const getAllAddToCard = async (query: Record<string, any>) => {
-  const addToCardModel = new QueryBuilder(AddToCard.find(), query)
+  const addToCardModel = new QueryBuilder(
+    AddToCard.find().populate([
+      { path: 'user', select: 'name email phoneNumber profile' },
+      {
+        path: 'product',
+        populate: [
+          {
+            path: 'author',
+            select: 'name email profile phoneNumber shop',
+            populate: { path: 'shop' },
+          },
+          { path: 'category', select: 'name banner' },
+        ],
+      },
+    ]),
+    query,
+  )
     .search([''])
     .filter()
     .paginate()
@@ -31,7 +46,10 @@ const getAllAddToCard = async (query: Record<string, any>) => {
 };
 
 const getAddToCardById = async (id: string) => {
-  const result = await AddToCard.findById(id);
+  const result = await AddToCard.findById(id).populate([
+    { path: 'user', select: 'name email phoneNumber profile' },
+    { path: 'product', populate: { path: 'category' } },
+  ]);
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'AddToCard not found!');
   }

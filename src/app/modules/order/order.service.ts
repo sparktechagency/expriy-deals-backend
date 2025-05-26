@@ -27,7 +27,13 @@ const createOrder = async (payload: IOrder) => {
 };
 
 const getAllOrder = async (query: Record<string, any>) => {
-  const orderModel = new QueryBuilder(Order.find({ isDeleted: false }), query)
+  const orderModel = new QueryBuilder(
+    Order.find({ isDeleted: false }).populate([
+      { path: 'product' },
+      { path: 'author', select: 'name email phoneNumber profile' },
+    ]),
+    query,
+  )
     .search([''])
     .filter()
     .paginate()
@@ -44,7 +50,10 @@ const getAllOrder = async (query: Record<string, any>) => {
 };
 
 const getOrderById = async (id: string) => {
-  const result = await Order.findById(id);
+  const result = await Order.findById(id).populate([
+    { path: 'product' },
+    { path: 'author', select: 'name email phoneNumber profile' },
+  ]);
   if (!result || result?.isDeleted) {
     throw new Error('Order not found!');
   }
