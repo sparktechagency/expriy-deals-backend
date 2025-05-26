@@ -16,6 +16,14 @@ const shopSchema = new Schema<IShop>(
       type: String,
       default: null,
     },
+    openingHours: {
+      type: String,
+      default: null,
+    },
+    openingDays: {
+      type: String,
+      default: null,
+    },
     logo: {
       type: String,
       default: null,

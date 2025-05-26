@@ -11,6 +11,7 @@ import { orderRoutes } from '../modules/order/order.route';
 import { bankDetailsRoutes } from '../modules/bankDetails/bankDetails.route';
 import { withdrawRequestRoutes } from '../modules/withdrawRequest/withdrawRequest.route';
 import { shopRoutes } from '../modules/shop/shop.route';
+import { addToCardRoutes } from '../modules/addToCard/addToCard.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -61,6 +62,10 @@ const moduleRoutes = [
   {
     path: '/shop',
     route: shopRoutes,
+  },
+  {
+    path: '/add-to-card',
+    route: addToCardRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));

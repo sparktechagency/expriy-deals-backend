@@ -8,6 +8,8 @@ export interface IShop {
   logo: string;
   banner: string;
   bannerColor: string;
+  openingHours: string;
+  openingDays: string;
   author: ObjectId | IUser;
   location: {
     type: string;

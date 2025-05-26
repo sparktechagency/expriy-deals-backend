@@ -20,17 +20,11 @@ const createShop = async (payload: IShop) => {
 const getAllShop = async (query: Record<string, any>) => {
   const { filters, pagination } = await pickQuery(query);
 
-  const {
-    searchTerm,
-    latitude,
-    longitude,
-    ...filtersData
-  } = filters;
+  const { searchTerm, latitude, longitude, ...filtersData } = filters;
 
   if (filtersData?.author) {
     filtersData['author'] = new Types.ObjectId(filtersData?.author);
   }
- 
 
   // Initialize the aggregation pipeline
   const pipeline: any[] = [];
@@ -71,8 +65,7 @@ const getAllShop = async (query: Record<string, any>) => {
       },
     });
   }
- 
- 
+
   if (Object.entries(filtersData).length) {
     // Add custom filters (filtersData) to the aggregation pipeline
     Object.entries(filtersData).map(([field, value]) => {
@@ -140,7 +133,7 @@ const getAllShop = async (query: Record<string, any>) => {
               },
             ],
           },
-        }, 
+        },
         {
           $addFields: {
             author: { $arrayElemAt: ['$author', 0] },
@@ -163,7 +156,6 @@ const getAllShop = async (query: Record<string, any>) => {
   };
 };
 
-
 // const getAllShop = async (query: Record<string, any>) => {
 //   const shopModel = new QueryBuilder(Shop.find({ isDeleted: false }), query)
 //     .search(['name'])
@@ -182,7 +174,9 @@ const getAllShop = async (query: Record<string, any>) => {
 // };
 
 const getShopById = async (id: string) => {
-  const result = await Shop.findById(id);
+  const result = await Shop.findById(id).populate([
+    { path: 'author', select: 'name email profile phoneNumber' },
+  ]);
   if (!result || result?.isDeleted) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Shop not found!');
   }
@@ -213,7 +207,6 @@ const updateShop = async (id: string, payload: Partial<IShop>, files: any) => {
   }
   return result;
 };
-
 
 const updateMyShop = async (
   userId: string,
