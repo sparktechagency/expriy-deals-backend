@@ -18,7 +18,7 @@ router.patch(
     { name: 'banner', maxCount: 1 },
   ]),
   parseData(),
-  shopController.updateShop,
+  shopController.updateMyShop,
 );
 
 router.patch(

@@ -194,7 +194,7 @@ const updateShop = async (id: string, payload: Partial<IShop>, files: any) => {
       })) as string;
     }
     if (banner?.length) {
-      payload.logo = (await uploadToS3({
+      payload.banner = (await uploadToS3({
         file: banner[0],
         fileName: `images/shop/banner/${Math.floor(100000 + Math.random() * 900000)}`,
       })) as string;
@@ -223,7 +223,7 @@ const updateMyShop = async (
       })) as string;
     }
     if (banner?.length) {
-      payload.logo = (await uploadToS3({
+      payload.banner = (await uploadToS3({
         file: banner[0],
         fileName: `images/shop/banner/${Math.floor(100000 + Math.random() * 900000)}`,
       })) as string;
