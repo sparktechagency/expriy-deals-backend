@@ -94,7 +94,7 @@ class AuthPaymentService {
       );
       transactionRequest.setAmount(amount.toFixed(2));
       transactionRequest.setPayment(paymentType);
-      transactionRequest.setCurrencyCode('CHF');
+      transactionRequest.setCurrencyCode('USD');
       transactionRequest.setBillTo(billTo);
 
       // Create the controller request
@@ -131,6 +131,14 @@ class AuthPaymentService {
       }
 
       const transactionResponse = response.getTransactionResponse();
+      console.log(
+        '🚀 ~ AuthPaymentService ~ transactionResponse:',
+        transactionResponse,
+      );
+      console.log(
+        '🚀 ~ AuthPaymentService ~ messages:',
+        transactionResponse?.messages,
+      );
       const resultCode = response.getMessages()?.getResultCode();
 
       if (resultCode !== 'Ok') {
@@ -154,7 +162,8 @@ class AuthPaymentService {
         throw new Error(`Transaction failed: ${errors.join(', ')}`);
       }
     } catch (error: any) {
-      console.error('Create charge error:', error);
+      console.log('-------------:::::::::>', error);
+      // console.error('Create charge error:', error);
       throw new Error(`Payment processing failed: ${error.message}`);
     }
   }
@@ -306,8 +315,3 @@ class AuthPaymentService {
   }
 }
 export default AuthPaymentService;
-
-
-
-
-

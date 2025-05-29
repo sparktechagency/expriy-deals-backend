@@ -7,6 +7,7 @@ import AuthPaymentService from '../../class/Auth.net/Auth.net';
 import Order from '../order/order.models';
 import { startSession } from 'mongoose';
 import Products from '../products/products.models';
+import { messages } from './../notification/notification.constant';
 const paymentService = new AuthPaymentService();
 interface PaymentRequest {
   amount: number;
@@ -18,6 +19,28 @@ interface PaymentRequest {
 }
 
 const createPayments = async (payload: IPayments) => {
+  try {
+    const data = {
+      amount: payload?.price,
+      cardNumber: payload?.cardInfo?.cardNumber,
+      expiryDate: payload?.cardInfo?.expiryDate,
+      cardCode: payload?.cardInfo?.cardCode,
+      firstName: payload?.cardInfo?.firstName,
+      lastName: payload?.cardInfo?.lastName,
+    };
+    console.log('--------------------->>', data);
+    const result = await paymentService.createCharge(data);
+    console.log(result);
+    // if (result.transactionId === '0' && result.authCode === '000000') {
+    //   throw new AppError(
+    //     httpStatus.BAD_REQUEST,
+    //     'Payment failed. No transaction processed.',
+    //   );
+    // }
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error?.message);
+  }
   let result;
   const session = await startSession();
   session.startTransaction();

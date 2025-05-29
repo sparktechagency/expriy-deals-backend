@@ -31,6 +31,7 @@ const getAllOrder = async (query: Record<string, any>) => {
     Order.find({ isDeleted: false }).populate([
       { path: 'product' },
       { path: 'author', select: 'name email phoneNumber profile' },
+      { path: 'user', select: 'name email phoneNumber profile' },
     ]),
     query,
   )

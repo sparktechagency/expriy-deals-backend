@@ -25,7 +25,7 @@ app.use(
 );
 
 // Remove duplicate static middleware
-// app.use(app.static('public'));
+// app.use(app.static('public')); webhook
 
 // application routes
 app.use('/api/v1', router);

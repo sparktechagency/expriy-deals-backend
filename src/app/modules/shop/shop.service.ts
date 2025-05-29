@@ -1,8 +1,7 @@
 import httpStatus from 'http-status';
 import { IShop } from './shop.interface';
 import Shop from './shop.models';
-import AppError from '../../error/AppError';
-import QueryBuilder from '../../class/builder/QueryBuilder';
+import AppError from '../../error/AppError'; 
 import { UploadedFiles } from '../../interface/common.interface';
 import { uploadToS3 } from '../../utils/s3';
 import pickQuery from '../../utils/pickQuery';
