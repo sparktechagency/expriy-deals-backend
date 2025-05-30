@@ -72,7 +72,7 @@ const createUser = async (payload: IUser): Promise<IUser> => {
       const shop = await Shop.create(
         [{ name: shopName, location, author: user[0]._id }],
         { session },
-      );
+      ); 
 
       if (!shop || shop.length === 0) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Shop creation failed');
@@ -100,12 +100,12 @@ const createUser = async (payload: IUser): Promise<IUser> => {
 
     return user[0];
   } catch (error) {
+    console.error(error);
     await session.abortTransaction();
     session.endSession();
     throw error;
   }
 };
-
 
 // const createUser = async (payload: IUser): Promise<IUser> => {
 //   const isExist = await User.isUserExist(payload.email as string);

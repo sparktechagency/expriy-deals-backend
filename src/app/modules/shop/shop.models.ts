@@ -41,9 +41,8 @@ const shopSchema = new Schema<IShop>(
       default: null,
     },
     location: {
-      type: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
-      },
+      type: { type: String, enum: ['Point'], default: 'Point' },
+
       coordinates: [{ type: Number, required: true }],
     },
     isDeleted: { type: Boolean, default: false },
