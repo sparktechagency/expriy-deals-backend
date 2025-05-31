@@ -54,7 +54,7 @@ const createWithdrawRequest = async (payload: IWithdrawRequest) => {
 const getAllWithdrawRequest = async (query: Record<string, any>) => {
   const withdrawRequestModel = new QueryBuilder(
     WithdrawRequest.find().populate({
-      path: 'user',
+      path: 'vendor',
       select: 'name email phoneNumber profile',
     }),
     query,
@@ -74,16 +74,18 @@ const getAllWithdrawRequest = async (query: Record<string, any>) => {
   };
 };
 
-const myWithdrawRequest = async (id: string) => {
-  const result = await WithdrawRequest.findOne({ vendor: id }).populate({
-    path: 'user',
-    select: 'name email phoneNumber profile',
-  });
-  if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'WithdrawRequest not found!');
-  }
-  return result;
-};
+// const myWithdrawRequest = async (id: string) => {
+//   console.log(id);
+//   const result = await WithdrawRequest.findOne({ vendor: id }).populate({
+//     path: 'user',
+//     select: 'name email phoneNumber profile',
+//   });
+//   console.log('🚀 ~ result ~ result:', result);
+//   if (!result) {
+//     throw new AppError(httpStatus.BAD_REQUEST, 'WithdrawRequest not found!');
+//   }
+//   return result;
+// };
 const getWithdrawRequestById = async (id: string) => {
   const result = await WithdrawRequest.findById(id).populate({
     path: 'user',
@@ -185,7 +187,7 @@ export const withdrawRequestService = {
   getWithdrawRequestById,
   updateWithdrawRequest,
   deleteWithdrawRequest,
-  myWithdrawRequest,
+  // myWithdrawRequest,
   rejectWithdrawRequest,
   approvedWithdrawRequest,
 };

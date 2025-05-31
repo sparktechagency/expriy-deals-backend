@@ -24,9 +24,9 @@ const withdrawRequestSchema = new Schema<IWithdrawRequest>(
     region: {
       type: String,
     },
-    isDeleted:{
-      type:Boolean,
-      default:false
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
     bankDetails: {
       type: Schema.Types.ObjectId,
