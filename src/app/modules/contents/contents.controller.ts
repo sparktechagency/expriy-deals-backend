@@ -34,6 +34,16 @@ const getContentsById = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+// Get contents by ID
+const getContentByQuery = catchAsync(async (req: Request, res: Response) => {
+  const result = await contentsService.getContentByQuery(req.query);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Content retrieved successfully',
+    data: result,
+  });
+});
 
 // Update contents
 const updateContents = catchAsync(async (req: Request, res: Response) => {
@@ -73,4 +83,5 @@ export const contentsController = {
   updateContents,
   deleteContents,
   deleteBanner,
+  getContentByQuery,
 };

@@ -63,6 +63,20 @@ const getContentsById = async (id: string) => {
   return result;
 };
 
+const getContentByQuery = async (query: Record<string, any>) => {
+  const data: IContents | null = await Contents.findOne({});
+
+  if (!data) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'content not found');
+  }
+  if (query?.name) {
+    //@ts-ignore
+    return data[`${query.name}`];
+  } else {
+    return data;
+  }
+};
+
 const deleteBanner = async (key: string) => {
   const content = await Contents.findOne({});
 
@@ -87,6 +101,7 @@ const deleteBanner = async (key: string) => {
 
   return result;
 };
+
 // Update content
 const updateContents = async (payload: Partial<IContents>, files: any) => {
   const content = await Contents.find({});
@@ -144,6 +159,7 @@ const updateContents = async (payload: Partial<IContents>, files: any) => {
 
   return result;
 };
+
 // Delete content
 const deleteContents = async (id: string) => {
   const result = await Contents.findByIdAndUpdate(
@@ -170,4 +186,5 @@ export const contentsService = {
   updateContents,
   deleteContents,
   deleteBanner,
+  getContentByQuery,
 };

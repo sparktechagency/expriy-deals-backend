@@ -30,6 +30,6 @@ router.delete('/:key', contentsController.deleteBanner);
 
 router.get('/:id', contentsController.getContentsById);
 
-router.get('/', contentsController.getAllContents);
+router.get('/', contentsController.getContentByQuery);
 
 export const contentsRoutes = router;

@@ -23,6 +23,7 @@ const moduleRoutes = [
     path: '/auth',
     route: authRoutes,
   },
+   
   {
     path: '/otp',
     route: otpRoutes,
