@@ -4,6 +4,7 @@ export interface IVendorRequest {
   name: string;
   shopName: string;
   email: string;
+  document: string;
   status: 'pending' | 'approved' | 'canceled';
   location: {
     type: 'Point';
