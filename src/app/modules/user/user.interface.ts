@@ -21,6 +21,7 @@ export interface IUser {
   address?: string;
   city?: string;
   state?: string;
+  customer: string;
   stripeccountId: string;
   country?: string;
   zipCode?: string;

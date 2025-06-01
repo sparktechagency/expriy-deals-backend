@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import { paymentsService } from './payments.service';
 import sendResponse from '../../utils/sendResponse';
+import httpStatus from 'http-status';
 
 const createPayments = catchAsync(async (req: Request, res: Response) => {
   req.body['user'] = req.user.userId;
@@ -11,6 +12,17 @@ const createPayments = catchAsync(async (req: Request, res: Response) => {
     success: true,
     message: 'Payments created successfully',
     data: result,
+  });
+});
+
+const confirmPayment = catchAsync(async (req: Request, res: Response) => {
+  const result = await paymentsService.confirmPayment(req?.query);
+  // res.redirect(`${config.success_url}?subscriptionId=${result?.subscription}`);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'payment successful',
   });
 });
 
@@ -59,4 +71,5 @@ export const paymentsController = {
   getPaymentsById,
   updatePayments,
   deletePayments,
+  confirmPayment,
 };

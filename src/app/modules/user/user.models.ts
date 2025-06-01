@@ -126,6 +126,9 @@ const userSchema: Schema<IUser> = new Schema(
     stripeAccountId: {
       type: String,
     },
+    customer: {
+      type: String,
+    },
     balance: {
       type: Number,
       default: 0,

@@ -35,30 +35,13 @@ const paymentsSchema = new Schema<IPayments>(
       type: Number,
       required: true,
     },
-
+    paymentIntentId: { type: String, default: null },
     isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
   },
 );
-
-//paymentsSchema.pre('find', function (next) {
-//  //@ts-ignore
-//  this.find({ isDeleted: { $ne: true } });
-//  next();
-//});
-
-//paymentsSchema.pre('findOne', function (next) {
-//@ts-ignore
-//this.find({ isDeleted: { $ne: true } });
-// next();
-//});
-
-paymentsSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
-  next();
-});
 
 const Payments = model<IPayments, IPaymentsModules>('Payments', paymentsSchema);
 export default Payments;

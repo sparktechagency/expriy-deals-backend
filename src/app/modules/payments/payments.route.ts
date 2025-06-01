@@ -5,7 +5,12 @@ import { USER_ROLE } from '../user/user.constants';
 
 const router = Router();
 
-router.post('/', auth(USER_ROLE.user), paymentsController.createPayments);
+router.post(
+  '/checkout',
+  auth(USER_ROLE.user),
+  paymentsController.createPayments,
+);
+router.get('/confirm-payment', paymentsController.confirmPayment);
 router.patch('/:id', paymentsController.updatePayments);
 router.delete('/:id', paymentsController.deletePayments);
 router.get('/:id', paymentsController.getPaymentsById);

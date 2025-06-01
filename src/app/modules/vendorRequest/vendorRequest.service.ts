@@ -112,6 +112,7 @@ const approveVendorRequest = async (id: string) => {
           name: result.name,
           email: result.email,
           role: USER_ROLE.vendor,
+          expireAt: null,
           password,
           verification: { status: true },
         },

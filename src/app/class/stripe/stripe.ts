@@ -89,11 +89,10 @@ class StripeService<T> {
     }
   }
 
-  public async refund(payment_intent: string, amount: number) {
+  public async refund(payment_intent: string, amount?: number) {
     try {
       return await this.stripe().refunds.create({
         payment_intent: payment_intent,
-        amount: Math.round(amount),
       });
     } catch (error) {
       this.handleError(error, 'Error processing refund');
@@ -134,9 +133,17 @@ class StripeService<T> {
     success_url: string,
     cancel_url: string,
     currency: string = 'usd',
-    payment_method_types: Array<'card' | 'paypal' | 'ideal'> = ['card'],
     customer: string = '', // Optional: customer ID for Stripe
+    payment_method_types: Array<'card' | 'paypal' | 'ideal'> = ['card'],
   ) {
+    console.log({
+      product,
+      success_url,
+      cancel_url,
+      currency,
+      customer,
+      payment_method_types,
+    });
     try {
       if (!product?.name || !product?.amount || !product?.quantity) {
         throw new Error('Product details are incomplete.');
@@ -183,6 +190,38 @@ class StripeService<T> {
       this.handleError(error, 'Error creating checkout session');
     }
   }
+  public async getPaymentSession(session_id: string) {
+    try {
+      return await this.stripe().checkout.sessions.retrieve(session_id);
+      // return (await this.stripe().paymentIntents.retrieve(intents_id)).status;
+    } catch (error) {
+      this.handleError(error, 'Error retrieving payment status');
+    }
+  }
+
+  public async createCustomer(email: string, name: string) {
+    try {
+      return await this.stripe().customers.create({
+        email,
+        name,
+        //   description: 'HandyHub.pro Customer', // Optional: for dashboard reference
+        //   metadata: {
+        //     platform: 'HandyHub.pro', // Custom metadata for tracking
+        //   },
+      });
+    } catch (error) {
+      this.handleError(error, 'customer creation failed');
+    }
+  }
+
+  public async getPaymentIntent(paymentIntentId: string) {
+    try {
+      return await this.stripe().paymentIntents.retrieve(paymentIntentId);
+    } catch (error) {
+      this.handleError(error, 'Error retrieving payment intent');
+    }
+  }
+
   public getStripe() {
     return this.stripe();
   }

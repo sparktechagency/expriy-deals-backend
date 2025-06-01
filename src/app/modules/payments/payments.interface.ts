@@ -1,21 +1,17 @@
 import { Model, ObjectId } from 'mongoose';
+import { IUser } from '../user/user.interface';
+import { IOrder } from '../order/order.interface';
 
 export interface IPayments {
-  user: ObjectId;
-  author: ObjectId;
-  order: ObjectId;
+  user: ObjectId | IUser;
+  author: ObjectId | IUser;
+  order: ObjectId | IOrder;
   status: 'pending' | 'paid' | 'refunded';
   deliveryStatus: 'pending' | 'ongoing' | 'picUp' | 'shifted' | 'delivered';
   trnId: string;
+  paymentIntentId: string;
   price: number;
   isDeleted: boolean;
-  cardInfo: {
-    cardNumber: string;
-    expiryDate: string;
-    cardCode: string;
-    firstName: string;
-    lastName: string;
-  };
 }
 
 export type IPaymentsModules = Model<IPayments, Record<string, unknown>>;
