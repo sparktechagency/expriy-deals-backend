@@ -26,6 +26,26 @@ const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const dashboardData = catchAsync(async (req: Request, res: Response) => {
+  const result = await paymentsService.dashboardData(req?.query);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'dashboard data successful',
+  });
+});
+
+
+const getEarnings = catchAsync(async (req: Request, res: Response) => {
+  const result = await paymentsService.getEarnings();
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'earnings data successful',
+  });
+});
 const getAllPayments = catchAsync(async (req: Request, res: Response) => {
   const result = await paymentsService.getAllPayments(req.query);
   sendResponse(res, {
@@ -72,4 +92,6 @@ export const paymentsController = {
   updatePayments,
   deletePayments,
   confirmPayment,
+  getEarnings,
+  dashboardData,
 };

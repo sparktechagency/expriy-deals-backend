@@ -15,6 +15,8 @@ import { ORDER_STATUS } from '../order/order.constants';
 import { notificationServices } from '../notification/notification.service';
 import { IUser } from '../user/user.interface';
 import { modeType } from '../notification/notification.interface';
+import moment from 'moment';
+import { USER_ROLE } from '../user/user.constants';
 
 const createPayments = async (payload: IPayments) => {
   const session = await startSession();
@@ -198,6 +200,284 @@ const confirmPayment = async (query: Record<string, any>) => {
   }
 };
 
+const getEarnings = async () => {
+  const today = moment().startOf('day');
+
+  const earnings = await Payments.aggregate([
+    {
+      $match: {
+        status: PAYMENT_STATUS.paid,
+        isDeleted: false,
+      },
+    },
+    {
+      $facet: {
+        totalEarnings: [
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$price' },
+            },
+          },
+        ],
+        todayEarnings: [
+          {
+            $match: {
+              createdAt: {
+                $gte: today.toDate(),
+                $lte: today.endOf('day').toDate(),
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$price' }, // Sum of today's earnings
+            },
+          },
+        ],
+        allData: [
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'user',
+              foreignField: '_id',
+              as: 'user',
+            },
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'author',
+              foreignField: '_id',
+              as: 'author',
+            },
+          },
+          {
+            $lookup: {
+              from: 'orders',
+              localField: 'orders',
+              foreignField: '_id',
+              as: 'ordersDetails',
+            },
+          },
+          {
+            $unwind: {
+              path: '$ordersDetails',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $project: {
+              user: { $arrayElemAt: ['$user', 0] }, // Extract first user if multiple exist
+              author: { $arrayElemAt: ['$author', 0] }, // Extract first user if multiple exist
+              order: '$ordersDetails', // Already an object, no need for $arrayElemAt
+              package: { $arrayElemAt: ['$packageDetails', 0] }, // Extract first package
+              amount: 1,
+              tranId: 1,
+              status: 1,
+              id: 1,
+              _id: 1,
+              createdAt: 1,
+              updatedAt: 1,
+            },
+          },
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  const totalEarnings =
+    (earnings?.length > 0 &&
+      earnings[0]?.totalEarnings?.length > 0 &&
+      earnings[0]?.totalEarnings[0]?.total) ||
+    0;
+  const todayEarnings =
+    (earnings?.length > 0 &&
+      earnings[0]?.todayEarnings?.length > 0 &&
+      earnings[0]?.todayEarnings[0]?.total) ||
+    0;
+
+  const allData = earnings[0]?.allData || [];
+
+  return { totalEarnings, todayEarnings, allData };
+};
+
+const dashboardData = async (query: Record<string, any>) => {
+  // Income Year Setup
+  const year = query.incomeYear ? Number(query.incomeYear) : moment().year();
+  const startOfYear = moment().year(year).startOf('year');
+  const endOfYear = moment().year(year).endOf('year');
+
+  // Aggregate payments data
+  const earnings = await Payments.aggregate([
+    {
+      $match: {
+        status: PAYMENT_STATUS.paid,
+        isDeleted: false,
+      },
+    },
+    {
+      $facet: {
+        totalEarnings: [
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$price' },
+            },
+          },
+        ],
+        monthlyIncome: [
+          {
+            $match: {
+              createdAt: {
+                $gte: startOfYear.toDate(),
+                $lte: endOfYear.toDate(),
+              },
+            },
+          },
+          {
+            $group: {
+              _id: { month: { $month: '$createdAt' } },
+              income: { $sum: '$price' },
+            },
+          },
+          { $sort: { '_id.month': 1 } },
+        ],
+      },
+    },
+  ]);
+
+  // Extract and format earnings data
+  const totalEarnings = earnings?.[0]?.totalEarnings?.[0]?.total || 0;
+
+  const monthlyIncomeRaw = earnings?.[0]?.monthlyIncome || [];
+
+  const formattedMonthlyIncome = Array.from({ length: 12 }, (_, i) => ({
+    month: moment().month(i).format('MMM'),
+    income: 0,
+  }));
+
+  monthlyIncomeRaw.forEach((entry: any) => {
+    formattedMonthlyIncome[entry._id.month - 1].income = Math.round(
+      entry.income,
+    );
+  });
+
+  // User Year Setup
+  const userYear = query.JoinYear ? Number(query.JoinYear) : moment().year();
+  const startOfUserYear = moment().year(userYear).startOf('year');
+  const endOfUserYear = moment().year(userYear).endOf('year');
+
+  // Aggregate user data
+  const usersData = await User.aggregate([
+    {
+      $facet: {
+        totalRegistration: [
+          {
+            $match: {
+              'verification.status': true,
+              isDeleted: false,
+              role: { $ne: USER_ROLE.admin },
+            },
+          },
+          { $count: 'count' },
+        ],
+        totalVendor: [
+          {
+            $match: {
+              role: USER_ROLE.vendor,
+              'verification.status': true,
+              isDeleted: false,
+            },
+          },
+          { $count: 'count' },
+        ],
+        totalUsers: [
+          {
+            $match: {
+              role: USER_ROLE.user,
+              'verification.status': true,
+              isDeleted: false,
+            },
+          },
+          { $count: 'count' },
+        ],
+        monthlyUser: [
+          {
+            $match: {
+              'verification.status': true,
+              role:
+                query.role === USER_ROLE.user
+                  ? USER_ROLE.user
+                  : USER_ROLE.vendor,
+              createdAt: {
+                $gte: startOfUserYear.toDate(),
+                $lte: endOfUserYear.toDate(),
+              },
+            },
+          },
+          {
+            $group: {
+              _id: { month: { $month: '$createdAt' } },
+              total: { $sum: 1 },
+            },
+          },
+          { $sort: { '_id.month': 1 } },
+        ],
+        userDetails: [
+          { $match: { role: { $ne: USER_ROLE.admin } } },
+          {
+            $project: {
+              _id: 1,
+              name: 1,
+              email: 1,
+              phoneNumber: 1,
+              role: 1,
+              referenceId: 1,
+              createdAt: 1,
+            },
+          },
+          { $sort: { createdAt: -1 } },
+          { $limit: 15 },
+        ],
+      },
+    },
+  ]);
+
+  // Extract user data safely
+  const totalUsers = usersData?.[0]?.totalUsers?.[0]?.count || 0;
+  const totalRegistration = usersData?.[0]?.totalRegistration?.[0]?.count || 0;
+  const totalVendor = usersData?.[0]?.totalVendor?.[0]?.count || 0;
+  const monthlyUserRaw = usersData?.[0]?.monthlyUser || [];
+  const userDetails = usersData?.[0]?.userDetails || [];
+
+  // Format monthly user registrations
+  const formattedMonthlyUsers = Array.from({ length: 12 }, (_, i) => ({
+    month: moment().month(i).format('MMM'),
+    total: 0,
+  }));
+
+  monthlyUserRaw.forEach((entry: any) => {
+    formattedMonthlyUsers[entry._id.month - 1].total = entry.total;
+  });
+
+  return {
+    totalUsers,
+    totalRegistration,
+    totalVendor,
+    totalIncome: totalEarnings,
+    monthlyIncome: formattedMonthlyIncome,
+    monthlyUsers: formattedMonthlyUsers,
+    userDetails,
+  };
+};
+
 const getAllPayments = async (query: Record<string, any>) => {
   const paymentsModel = new QueryBuilder(
     Payments.find({ isDeleted: false }),
@@ -253,4 +533,6 @@ export const paymentsService = {
   updatePayments,
   deletePayments,
   confirmPayment,
+  getEarnings,
+  dashboardData,
 };
