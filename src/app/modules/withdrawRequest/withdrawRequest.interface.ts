@@ -6,7 +6,7 @@ export interface IWithdrawRequest {
   vendor: ObjectId | IUser;
   amount: Number;
   status: 'pending' | 'approved' | 'rejected';
-  region: string;
+  reason: string;
   bankDetails: ObjectId | IBankDetails;
   isDeleted: boolean;
 }

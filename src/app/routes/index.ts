@@ -12,6 +12,7 @@ import { bankDetailsRoutes } from '../modules/bankDetails/bankDetails.route';
 import { withdrawRequestRoutes } from '../modules/withdrawRequest/withdrawRequest.route';
 import { shopRoutes } from '../modules/shop/shop.route';
 import { addToCardRoutes } from '../modules/addToCard/addToCard.route';
+import { vendorRequestRoutes } from '../modules/vendorRequest/vendorRequest.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -23,7 +24,11 @@ const moduleRoutes = [
     path: '/auth',
     route: authRoutes,
   },
-   
+  {
+    path: '/vendor-request',
+    route: vendorRequestRoutes,
+  },
+
   {
     path: '/otp',
     route: otpRoutes,

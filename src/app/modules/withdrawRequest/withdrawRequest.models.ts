@@ -21,7 +21,7 @@ const withdrawRequestSchema = new Schema<IWithdrawRequest>(
       enum: ['pending', 'approved', 'rejected'],
       default: 'pending',
     },
-    region: {
+    reason: {
       type: String,
     },
     isDeleted: {

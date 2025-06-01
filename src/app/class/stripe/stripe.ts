@@ -188,4 +188,6 @@ class StripeService<T> {
   }
 }
 
-export default new StripeService();
+const StripePaymentService = new StripeService();
+
+export default StripePaymentService;

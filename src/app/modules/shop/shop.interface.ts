@@ -7,6 +7,7 @@ export interface IShop {
   address: string;
   logo: string;
   banner: string;
+  document: string;
   bannerColor: string;
   openingHours: string;
   openingDays: string;

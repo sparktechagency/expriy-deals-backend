@@ -32,6 +32,10 @@ const shopSchema = new Schema<IShop>(
       type: String,
       default: null,
     },
+    document: {
+      type: String,
+      default: null,
+    },
     bannerColor: {
       type: String,
       default: () => generateRandomHexColor(),

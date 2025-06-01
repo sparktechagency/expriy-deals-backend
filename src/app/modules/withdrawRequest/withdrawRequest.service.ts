@@ -11,6 +11,8 @@ import { IUser } from '../user/user.interface';
 import { notificationServices } from '../notification/notification.service';
 import { USER_ROLE } from '../user/user.constants';
 import { modeType } from '../notification/notification.interface';
+import stripe from '../../class/stripe/stripe';
+import StripePaymentService from '../../class/stripe/stripe';
 
 const createWithdrawRequest = async (payload: IWithdrawRequest) => {
   const bankDetails: IBankDetails | null = await BankDetails.findByVendorId(
@@ -74,18 +76,6 @@ const getAllWithdrawRequest = async (query: Record<string, any>) => {
   };
 };
 
-// const myWithdrawRequest = async (id: string) => {
-//   console.log(id);
-//   const result = await WithdrawRequest.findOne({ vendor: id }).populate({
-//     path: 'user',
-//     select: 'name email phoneNumber profile',
-//   });
-//   console.log('🚀 ~ result ~ result:', result);
-//   if (!result) {
-//     throw new AppError(httpStatus.BAD_REQUEST, 'WithdrawRequest not found!');
-//   }
-//   return result;
-// };
 const getWithdrawRequestById = async (id: string) => {
   const result = await WithdrawRequest.findById(id).populate({
     path: 'user',
@@ -126,6 +116,14 @@ const approvedWithdrawRequest = async (id: string) => {
       'Failed to update WithdrawRequest',
     );
   }
+  const vendor: IUser | null = await User.findById(result.vendor).select(
+    'stripeAccountId',
+  );
+  if (!vendor) throw new AppError(httpStatus.BAD_REQUEST, 'vendor not found');
+  const transfer = await StripePaymentService.transfer(
+    Number(result.amount),
+    vendor?.stripeccountId,
+  );
 
   await notificationServices.insertNotificationIntoDb({
     receiver: result?.vendor,
@@ -143,7 +141,7 @@ const rejectWithdrawRequest = async (
 ) => {
   const result = await WithdrawRequest.findByIdAndUpdate(
     id,
-    { status: 'rejected', region: payload?.region },
+    { status: 'rejected', reason: payload?.reason },
     {
       new: true,
     },
