@@ -21,6 +21,7 @@ export interface IUser {
   address?: string;
   city?: string;
   state?: string;
+  stripeccountId: string;
   country?: string;
   zipCode?: string;
   needsPasswordChange: boolean;
