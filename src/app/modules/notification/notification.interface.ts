@@ -3,6 +3,7 @@ export enum modeType {
   Payments = 'Payments',
   WithdrawRequest = 'WithdrawRequest',
   Order = 'Order',
+  VendorRequest = 'VendorRequest',
 }
 export interface TNotification {
   receiver: ObjectId;
