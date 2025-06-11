@@ -55,10 +55,15 @@ const createWithdrawRequest = async (payload: IWithdrawRequest) => {
 
 const getAllWithdrawRequest = async (query: Record<string, any>) => {
   const withdrawRequestModel = new QueryBuilder(
-    WithdrawRequest.find().populate({
-      path: 'vendor',
-      select: 'name email phoneNumber profile',
-    }),
+    WithdrawRequest.find().populate([
+      {
+        path: 'vendor',
+        select: 'name email phoneNumber profile',
+      },
+      {
+        path: 'bankDetails',
+      },
+    ]),
     query,
   )
     .search([''])
@@ -78,7 +83,7 @@ const getAllWithdrawRequest = async (query: Record<string, any>) => {
 
 const getWithdrawRequestById = async (id: string) => {
   const result = await WithdrawRequest.findById(id).populate({
-    path: 'user',
+    path: 'vendor',
     select: 'name email phoneNumber profile',
   });
   if (!result) {
@@ -146,6 +151,7 @@ const rejectWithdrawRequest = async (
       new: true,
     },
   );
+
   if (!result) {
     throw new AppError(
       httpStatus.BAD_REQUEST,

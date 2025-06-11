@@ -35,10 +35,28 @@ const dashboardData = catchAsync(async (req: Request, res: Response) => {
     message: 'dashboard data successful',
   });
 });
-
+const vendorDashboardData = catchAsync(async (req: Request, res: Response) => {
+  req.query.author = req.user.userId;
+  const result = await paymentsService.vendorDashboardData(req?.query);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'dashboard data successful',
+  });
+});
 
 const getEarnings = catchAsync(async (req: Request, res: Response) => {
-  const result = await paymentsService.getEarnings();
+  const result = await paymentsService.getEarnings(req.query);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'earnings data successful',
+  });
+});
+const getVendorEarnings = catchAsync(async (req: Request, res: Response) => {
+  const result = await paymentsService.getVendorEarnings(req.user.userId);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -65,6 +83,17 @@ const getPaymentsById = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getPaymentsByOrderId = catchAsync(async (req: Request, res: Response) => {
+  const result = await paymentsService.getPaymentsByOrderId(req.params.orderId);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Get payment by orderId successfully',
+    data: result,
+  });
+});
+
 const updatePayments = catchAsync(async (req: Request, res: Response) => {
   const result = await paymentsService.updatePayments(req.params.id, req.body);
   sendResponse(res, {
@@ -94,4 +123,7 @@ export const paymentsController = {
   confirmPayment,
   getEarnings,
   dashboardData,
+  getPaymentsByOrderId,
+  vendorDashboardData,
+  getVendorEarnings,
 };

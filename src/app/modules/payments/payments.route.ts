@@ -15,11 +15,22 @@ router.get(
   auth(USER_ROLE.admin),
   paymentsController.dashboardData,
 );
+router.get(
+  '/vendor-dashboard-data',
+  auth(USER_ROLE.vendor),
+  paymentsController.vendorDashboardData,
+);
+router.get(
+  '/vendor-earnings',
+  auth(USER_ROLE.vendor),
+  paymentsController.getVendorEarnings,
+);
 router.get('/confirm-payment', paymentsController.confirmPayment);
 router.get('/earnings', auth(USER_ROLE.admin), paymentsController.getEarnings);
 router.patch('/:id', paymentsController.updatePayments);
 router.delete('/:id', paymentsController.deletePayments);
 router.get('/:id', paymentsController.getPaymentsById);
+router.get('/order/:orderId', paymentsController.getPaymentsByOrderId);
 router.get('/', paymentsController.getAllPayments);
 
 export const paymentsRoutes = router;

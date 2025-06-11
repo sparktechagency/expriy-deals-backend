@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const rejectRequestValidator = z.object({
   body: z.object({
-    region: z.string({ required_error: 'region is required' }),
+    reason: z.string({ required_error: 'Reason is required' }),
   }),
 });
 

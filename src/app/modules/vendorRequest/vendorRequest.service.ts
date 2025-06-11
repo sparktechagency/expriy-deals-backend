@@ -32,7 +32,7 @@ const createVendorRequest = async (payload: IVendorRequest, file: any) => {
   if (file) {
     payload.document = (await uploadToS3({
       file: file,
-      fileName: ` images/vendor/documents/${generateCryptoString(3)}`,
+      fileName: `images/vendor/documents/${Math.floor(100000 + Math.random() * 900000)}${Date.now()}}`,
     })) as string;
   }
   const result = await VendorRequest.create(payload);

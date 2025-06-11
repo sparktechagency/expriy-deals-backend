@@ -72,7 +72,7 @@ const createUser = async (payload: IUser): Promise<IUser> => {
       const shop = await Shop.create(
         [{ name: shopName, location, author: user[0]._id }],
         { session },
-      ); 
+      );
 
       if (!shop || shop.length === 0) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Shop creation failed');
@@ -208,6 +208,28 @@ const updateUser = async (id: string, payload: Partial<IUser>) => {
   return user;
 };
 
+const toggleUserStatusInDB = async (userId: string, loggedInUserId: string) => {
+  if (userId === loggedInUserId)
+    throw new AppError(httpStatus.NOT_FOUND, "Own status can't be changed");
+
+  const isUserExist = await User.findById(userId);
+
+  if (!isUserExist) throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+
+  const res = await User.findByIdAndUpdate(
+    userId,
+    {
+      status: isUserExist?.status === 'active' ? 'blocked' : 'active',
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+
+  return res;
+};
+
 const deleteUser = async (id: string) => {
   const user = await User.findByIdAndUpdate(
     id,
@@ -227,5 +249,6 @@ export const userService = {
   getAllUser,
   geUserById,
   updateUser,
+  toggleUserStatusInDB,
   deleteUser,
 };

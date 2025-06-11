@@ -21,7 +21,12 @@ const createCategory = async (payload: ICategory) => {
 };
 
 const getAllCategories = async (query: Record<string, any>) => {
-  const categoriesModel = new QueryBuilder(Category.find(), query)
+  const categoriesModel = new QueryBuilder(
+    Category.find({
+      isDeleted: { $eq: false },
+    }),
+    query,
+  )
     .search(['name'])
     .filter()
     .paginate()

@@ -4,7 +4,7 @@ import Payments from './payments.models';
 import AppError from '../../error/AppError';
 import QueryBuilder from '../../class/builder/QueryBuilder';
 import Order from '../order/order.models';
-import { startSession } from 'mongoose';
+import { startSession, Types } from 'mongoose';
 import generateCryptoString from '../../utils/generateCryptoString';
 import StripePaymentService from '../../class/stripe/stripe';
 import config from '../../config';
@@ -17,6 +17,7 @@ import { IUser } from '../user/user.interface';
 import { modeType } from '../notification/notification.interface';
 import moment from 'moment';
 import { USER_ROLE } from '../user/user.constants';
+import Products from '../products/products.models';
 
 const createPayments = async (payload: IPayments) => {
   const session = await startSession();
@@ -200,13 +201,134 @@ const confirmPayment = async (query: Record<string, any>) => {
   }
 };
 
-const getEarnings = async () => {
+const getEarnings = async (query: Record<string, any>) => {
+  const { searchTerm } = query;
+  const today = moment().startOf('day');
+
+  const searchRegex = searchTerm ? new RegExp(searchTerm.trim(), 'i') : null;
+
+  const earnings = await Payments.aggregate([
+    {
+      $match: {
+        status: PAYMENT_STATUS.paid,
+        isDeleted: false,
+      },
+    },
+    {
+      $facet: {
+        totalEarnings: [
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$price' },
+            },
+          },
+        ],
+        todayEarnings: [
+          {
+            $match: {
+              createdAt: {
+                $gte: today.toDate(),
+                $lte: today.endOf('day').toDate(),
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$price' },
+            },
+          },
+        ],
+        allData: [
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'user',
+              foreignField: '_id',
+              as: 'user',
+            },
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'author',
+              foreignField: '_id',
+              as: 'author',
+            },
+          },
+          {
+            $lookup: {
+              from: 'orders',
+              localField: 'order',
+              foreignField: '_id',
+              as: 'ordersDetails',
+            },
+          },
+          {
+            $unwind: {
+              path: '$ordersDetails',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $addFields: {
+              userObj: { $arrayElemAt: ['$user', 0] },
+              authorObj: { $arrayElemAt: ['$author', 0] },
+            },
+          },
+          ...(searchRegex
+            ? [
+                {
+                  $match: {
+                    $or: [
+                      { 'userObj.name': { $regex: searchRegex } },
+                      { trnId: { $regex: searchRegex } },
+                      { status: { $regex: searchRegex } },
+                    ],
+                  },
+                },
+              ]
+            : []),
+          {
+            $project: {
+              user: '$userObj',
+              author: '$authorObj',
+              order: '$ordersDetails',
+              price: 1,
+              trnId: 1,
+              status: 1,
+              id: 1,
+              _id: 1,
+              createdAt: 1,
+              updatedAt: 1,
+            },
+          },
+          {
+            $sort: { createdAt: -1 },
+          },
+        ],
+      },
+    },
+  ]);
+
+  const totalEarnings = earnings?.[0]?.totalEarnings?.[0]?.total || 0;
+
+  const todayEarnings = earnings?.[0]?.todayEarnings?.[0]?.total || 0;
+
+  const allData = earnings?.[0]?.allData || [];
+
+  return { totalEarnings, todayEarnings, allData };
+};
+
+const getVendorEarnings = async (userId: string) => {
   const today = moment().startOf('day');
 
   const earnings = await Payments.aggregate([
     {
       $match: {
         status: PAYMENT_STATUS.paid,
+        author: new Types.ObjectId(userId),
         isDeleted: false,
       },
     },
@@ -272,9 +394,9 @@ const getEarnings = async () => {
               user: { $arrayElemAt: ['$user', 0] }, // Extract first user if multiple exist
               author: { $arrayElemAt: ['$author', 0] }, // Extract first user if multiple exist
               order: '$ordersDetails', // Already an object, no need for $arrayElemAt
-              package: { $arrayElemAt: ['$packageDetails', 0] }, // Extract first package
-              amount: 1,
-              tranId: 1,
+              // package: { $arrayElemAt: ['$packageDetails', 0] }, // Extract first package
+              price: 1,
+              trnId: 1,
               status: 1,
               id: 1,
               _id: 1,
@@ -441,6 +563,7 @@ const dashboardData = async (query: Record<string, any>) => {
               role: 1,
               referenceId: 1,
               createdAt: 1,
+              profile: 1,
             },
           },
           { $sort: { createdAt: -1 } },
@@ -452,6 +575,7 @@ const dashboardData = async (query: Record<string, any>) => {
 
   // Extract user data safely
   const totalUsers = usersData?.[0]?.totalUsers?.[0]?.count || 0;
+  const totalProducts = await Products.countDocuments({ isDeleted: false });
   const totalRegistration = usersData?.[0]?.totalRegistration?.[0]?.count || 0;
   const totalVendor = usersData?.[0]?.totalVendor?.[0]?.count || 0;
   const monthlyUserRaw = usersData?.[0]?.monthlyUser || [];
@@ -472,9 +596,83 @@ const dashboardData = async (query: Record<string, any>) => {
     totalRegistration,
     totalVendor,
     totalIncome: totalEarnings,
+    totalProducts,
     monthlyIncome: formattedMonthlyIncome,
     monthlyUsers: formattedMonthlyUsers,
     userDetails,
+  };
+};
+
+const vendorDashboardData = async (query: Record<string, any>) => {
+  // Income Year Setup
+  const year = query.incomeYear ? Number(query.incomeYear) : moment().year();
+  const startOfYear = moment().year(year).startOf('year');
+  const endOfYear = moment().year(year).endOf('year');
+
+  // Aggregate payments data
+  const earnings = await Payments.aggregate([
+    {
+      $match: {
+        status: PAYMENT_STATUS.paid,
+        author: new Types.ObjectId(query.author),
+        isDeleted: false,
+      },
+    },
+    {
+      $facet: {
+        totalEarnings: [
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$price' },
+            },
+          },
+        ],
+        monthlyIncome: [
+          {
+            $match: {
+              createdAt: {
+                $gte: startOfYear.toDate(),
+                $lte: endOfYear.toDate(),
+              },
+            },
+          },
+          {
+            $group: {
+              _id: { month: { $month: '$createdAt' } },
+              income: { $sum: '$price' },
+            },
+          },
+          { $sort: { '_id.month': 1 } },
+        ],
+      },
+    },
+  ]);
+
+  // Extract and format earnings data
+  const totalEarnings = earnings?.[0]?.totalEarnings?.[0]?.total || 0;
+
+  const monthlyIncomeRaw = earnings?.[0]?.monthlyIncome || [];
+
+  const formattedMonthlyIncome = Array.from({ length: 12 }, (_, i) => ({
+    month: moment().month(i).format('MMM'),
+    income: 0,
+  }));
+
+  monthlyIncomeRaw.forEach((entry: any) => {
+    formattedMonthlyIncome[entry._id.month - 1].income = Math.round(
+      entry.income,
+    );
+  });
+
+  const totalProducts = await Products.countDocuments({
+    author: query.user,
+  });
+
+  return {
+    totalIncome: totalEarnings,
+    totalProducts,
+    monthlyIncome: formattedMonthlyIncome,
   };
 };
 
@@ -500,6 +698,16 @@ const getAllPayments = async (query: Record<string, any>) => {
 
 const getPaymentsById = async (id: string) => {
   const result = await Payments.findById(id);
+  if (!result || result?.isDeleted) {
+    throw new Error('Payments not found!');
+  }
+  return result;
+};
+
+const getPaymentsByOrderId = async (orderId: string) => {
+  const result = await Payments.findOne({ order: orderId }).populate([
+    { path: 'user', select: 'name' },
+  ]);
   if (!result || result?.isDeleted) {
     throw new Error('Payments not found!');
   }
@@ -535,4 +743,7 @@ export const paymentsService = {
   confirmPayment,
   getEarnings,
   dashboardData,
+  getPaymentsByOrderId,
+  vendorDashboardData,
+  getVendorEarnings,
 };

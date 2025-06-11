@@ -13,6 +13,7 @@ import { withdrawRequestRoutes } from '../modules/withdrawRequest/withdrawReques
 import { shopRoutes } from '../modules/shop/shop.route';
 import { addToCardRoutes } from '../modules/addToCard/addToCard.route';
 import { vendorRequestRoutes } from '../modules/vendorRequest/vendorRequest.route';
+import stripeRoute from '../modules/stripe/stripe.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -68,6 +69,10 @@ const moduleRoutes = [
   {
     path: '/shop',
     route: shopRoutes,
+  },
+  {
+    path: '/stripe',
+    route: stripeRoute,
   },
   {
     path: '/add-to-card',

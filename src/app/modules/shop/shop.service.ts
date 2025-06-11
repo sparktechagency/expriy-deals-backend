@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import { IShop } from './shop.interface';
 import Shop from './shop.models';
-import AppError from '../../error/AppError'; 
+import AppError from '../../error/AppError';
 import { UploadedFiles } from '../../interface/common.interface';
 import { uploadToS3 } from '../../utils/s3';
 import pickQuery from '../../utils/pickQuery';
@@ -20,6 +20,7 @@ const getAllShop = async (query: Record<string, any>) => {
   const { filters, pagination } = await pickQuery(query);
 
   const { searchTerm, latitude, longitude, ...filtersData } = filters;
+  console.log({ latitude, longitude });
 
   if (filtersData?.author) {
     filtersData['author'] = new Types.ObjectId(filtersData?.author);

@@ -99,6 +99,20 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const toggleUserStatus = catchAsync(async (req, res) => {
+  const userId = req.params.id;
+  const loggedInUserId = req.user?.userId;
+
+  const result = await userService.toggleUserStatusInDB(userId, loggedInUserId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User status updated successfully',
+    data: result,
+  });
+});
+
 const deleteUser = catchAsync(async (req: Request, res: Response) => {
   const result = await userService.deleteUser(req.params.id);
   sendResponse(res, {
@@ -126,6 +140,7 @@ export const userController = {
   getMyProfile,
   updateUser,
   updateMyProfile,
+  toggleUserStatus,
   deleteUser,
   deleteMYAccount,
 };

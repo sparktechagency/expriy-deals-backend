@@ -44,6 +44,12 @@ router.patch(
   userController.updateUser,
 );
 
+router.patch(
+  '/toggle-status/:id',
+  auth(USER_ROLE.admin, USER_ROLE.sub_admin, USER_ROLE.super_admin),
+  userController.toggleUserStatus,
+);
+
 router.delete(
   '/delete-my-account',
   auth(
