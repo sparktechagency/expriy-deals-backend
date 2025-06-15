@@ -165,6 +165,18 @@ const confirmPayment = async (query: Record<string, any>) => {
     }
     // const admin = await User.findOne({ role: USER_ROLE.admin });
 
+    // 🔽 Add this block right after the order update
+    await Products.findByIdAndUpdate(
+      order.product,
+      {
+        $inc: {
+          stock: -order.quantity,
+          totalSell: order.quantity,
+        },
+      },
+      { session },
+    );
+
     notificationServices.insertNotificationIntoDb({
       receiver: (payment?.user as IUser)?._id,
       message: 'Payment Successful',
@@ -666,7 +678,7 @@ const vendorDashboardData = async (query: Record<string, any>) => {
   });
 
   const totalProducts = await Products.countDocuments({
-    author: query.user,
+    author: query.author,
   });
 
   return {

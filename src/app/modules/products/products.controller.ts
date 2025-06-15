@@ -23,6 +23,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 const getMyProducts = catchAsync(async (req: Request, res: Response) => {
   req.query.author = req.user.userId;
   const result = await productsService.getAllProducts(req.query);
@@ -30,6 +31,17 @@ const getMyProducts = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: 'All products fetched successfully',
+    data: result,
+  });
+});
+
+const getAuthorProducts = catchAsync(async (req: Request, res: Response) => {
+  req.query.author = req.params.authorId;
+  const result = await productsService.getAllProducts(req.query);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'All author products fetched successfully',
     data: result,
   });
 });
@@ -71,6 +83,7 @@ export const productsController = {
   createProducts,
   getAllProducts,
   getProductsById,
+  getAuthorProducts,
   updateProducts,
   deleteProducts,
   getMyProducts,

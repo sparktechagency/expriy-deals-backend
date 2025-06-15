@@ -45,6 +45,12 @@ router.get(
   productsController.getMyProducts,
 );
 
+router.get(
+  '/author/:authorId',
+  auth(USER_ROLE.user),
+  productsController.getAuthorProducts,
+);
+
 // Get a product by ID
 router.get('/:id', productsController.getProductsById);
 

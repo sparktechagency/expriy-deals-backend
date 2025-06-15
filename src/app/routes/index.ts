@@ -29,7 +29,6 @@ const moduleRoutes = [
     path: '/vendor-request',
     route: vendorRequestRoutes,
   },
-
   {
     path: '/otp',
     route: otpRoutes,

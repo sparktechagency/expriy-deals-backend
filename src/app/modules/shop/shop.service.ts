@@ -136,9 +136,7 @@ const getAllShop = async (query: Record<string, any>) => {
         },
         {
           $addFields: {
-            author: { $arrayElemAt: ['$author', 0] },
-            // facility: { $arrayElemAt: ['$facility', 0] },
-            // ratings: { $arrayElemAt: ['$ratings', 0] },
+            author: { $arrayElemAt: ['$author', 0] }, 
           },
         },
       ],
@@ -156,22 +154,7 @@ const getAllShop = async (query: Record<string, any>) => {
   };
 };
 
-// const getAllShop = async (query: Record<string, any>) => {
-//   const shopModel = new QueryBuilder(Shop.find({ isDeleted: false }), query)
-//     .search(['name'])
-//     .filter()
-//     .paginate()
-//     .sort()
-//     .fields();
-
-//   const data = await shopModel.modelQuery;
-//   const meta = await shopModel.countTotal();
-
-//   return {
-//     data,
-//     meta,
-//   };
-// };
+ 
 
 const getShopById = async (id: string) => {
   const result = await Shop.findById(id).populate([

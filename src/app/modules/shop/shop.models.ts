@@ -56,5 +56,7 @@ const shopSchema = new Schema<IShop>(
   },
 );
 
+shopSchema.index({ location: '2dsphere' });
+
 const Shop = model<IShop, IShopModules>('Shop', shopSchema);
 export default Shop;
