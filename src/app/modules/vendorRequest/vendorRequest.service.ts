@@ -197,6 +197,7 @@ const rejectVendorRequest = async (id: string, payload: { reason: string }) => {
   await VendorRequest.findByIdAndDelete(id);
   return result;
 };
+
 const deleteVendorRequest = async (id: string) => {
   const result = await VendorRequest.findByIdAndUpdate(
     id,

@@ -42,7 +42,7 @@ router.delete(
   ),
   shopController.deleteShop,
 );
-router.get('/my-shop', auth(USER_ROLE.vendor), shopController.getShopById);
+router.get('/my-shop', auth(USER_ROLE.vendor), shopController.getMyShopById);
 router.get('/:id', shopController.getShopById);
 router.get('/', shopController.getAllShop);
 

@@ -32,8 +32,22 @@ const createOrder = async (payload: IOrder) => {
 const getAllOrder = async (query: Record<string, any>) => {
   const orderModel = new QueryBuilder(
     Order.find({ isDeleted: false }).populate([
-      { path: 'product' },
-      { path: 'author', select: 'name email phoneNumber profile' },
+      {
+        path: 'product',
+        populate: [
+          {
+            path: 'author',
+            select: 'name email profile phoneNumber shop',
+            populate: { path: 'shop' },
+          },
+          { path: 'category', select: 'name banner' },
+        ],
+      },
+      {
+        path: 'author',
+        select: 'name email phoneNumber profile',
+        populate: [{ path: 'shop', select: 'name logo banner bannerColor' }],
+      },
       { path: 'user', select: 'name email phoneNumber profile' },
     ]),
     query,
@@ -55,7 +69,17 @@ const getAllOrder = async (query: Record<string, any>) => {
 
 const getOrderById = async (id: string) => {
   const result = await Order.findById(id).populate([
-    { path: 'product' },
+    {
+      path: 'product',
+      populate: [
+        {
+          path: 'author',
+          select: 'name email profile phoneNumber shop',
+          populate: { path: 'shop' },
+        },
+        { path: 'category', select: 'name banner' },
+      ],
+    },
     { path: 'author', select: 'name email phoneNumber profile' },
   ]);
   if (!result || result?.isDeleted) {

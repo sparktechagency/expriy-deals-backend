@@ -32,6 +32,15 @@ const getShopById = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getMyShopById = catchAsync(async (req: Request, res: Response) => {
+  const result = await shopService.getMyShopById(req.user.userId);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Shop fetched successfully',
+    data: result,
+  });
+});
 
 const updateShop = catchAsync(async (req: Request, res: Response) => {
   const result = await shopService.updateShop(
@@ -75,7 +84,7 @@ export const shopController = {
   createShop,
   getAllShop,
   getShopById,
-  updateShop,
+  updateShop,getMyShopById,
   deleteShop,
   updateMyShop,
 };

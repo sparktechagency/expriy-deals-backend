@@ -136,7 +136,7 @@ const getAllShop = async (query: Record<string, any>) => {
         },
         {
           $addFields: {
-            author: { $arrayElemAt: ['$author', 0] }, 
+            author: { $arrayElemAt: ['$author', 0] },
           },
         },
       ],
@@ -154,10 +154,17 @@ const getAllShop = async (query: Record<string, any>) => {
   };
 };
 
- 
-
 const getShopById = async (id: string) => {
   const result = await Shop.findById(id).populate([
+    { path: 'author', select: 'name email profile phoneNumber' },
+  ]);
+  if (!result || result?.isDeleted) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Shop not found!');
+  }
+  return result;
+};
+const getMyShopById = async (id: string) => {
+  const result = await Shop.findOne({ author: id }).populate([
     { path: 'author', select: 'name email profile phoneNumber' },
   ]);
   if (!result || result?.isDeleted) {
@@ -241,4 +248,5 @@ export const shopService = {
   updateShop,
   deleteShop,
   updateMyShop,
+  getMyShopById,
 };
