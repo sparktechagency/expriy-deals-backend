@@ -9,6 +9,8 @@ export interface IPayments {
   status: 'pending' | 'paid' | 'refunded';
   deliveryStatus: 'pending' | 'ongoing' | 'picUp' | 'shifted' | 'delivered';
   trnId: string;
+  adminAmount: number;
+  vendorAmount: number;
   paymentIntentId: string;
   price: number;
   isDeleted: boolean;

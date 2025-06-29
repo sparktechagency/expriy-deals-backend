@@ -151,6 +151,7 @@ const confirmPayment = async (query: Record<string, any>) => {
     if (!payment) {
       throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
     }
+    
     const order = await Order.findByIdAndUpdate(
       payment?.order,
       {
@@ -160,6 +161,7 @@ const confirmPayment = async (query: Record<string, any>) => {
       },
       { new: true, session },
     );
+
     if (!order) {
       throw new AppError(httpStatus.BAD_REQUEST, 'order confirmation failed');
     }

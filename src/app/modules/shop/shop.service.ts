@@ -35,7 +35,7 @@ const getAllShop = async (query: Record<string, any>) => {
       $geoNear: {
         near: {
           type: 'Point',
-          coordinates: [parseFloat(longitude), parseFloat(latitude)],
+          coordinates: [Number(longitude), Number(latitude)],
         },
         key: 'location',
         maxDistance: parseFloat(5 as unknown as string) * 1609, // 5 miles to meters
