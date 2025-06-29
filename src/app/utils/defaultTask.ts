@@ -14,11 +14,11 @@ export async function defaultTask() {
       phoneNumber: '+8801321834780',
       password: '112233',
       role: 'admin',
-      expireAt: null,
       verification: {
         otp: '0',
         status: true,
       },
+      expireAt: null,
     });
   }
 
