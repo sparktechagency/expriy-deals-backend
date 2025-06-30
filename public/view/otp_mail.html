@@ -1,100 +1,155 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <style>
-      /* Global Styles */
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f5f5f5;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        width: 100%;
-        padding: 20px;
-        background-color: #ffffff;
-      }
-      .email-body {
-        max-width: 600px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        border: 1px solid #e5e5e5;
-        padding: 30px;
-        border-radius: 8px;
-      }
-      .logo {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .logo img {
-        width: 120px;
-      }
-      .otp-message {
-        font-size: 18px;
-        color: #333333;
-        margin-bottom: 20px;
-        text-align: center;
-      }
-      .otp-code {
-        display: inline-block;
-        font-size: 24px;
-        font-weight: bold;
-        color: #fe6201;
-        background-color: #ffa1131f;
-        padding: 10px 20px;
-        border-radius: 5px;
-      }
-      .cta {
-        text-align: center;
-        margin-top: 30px;
-      }
-      .footer {
-        font-size: 12px;
-        color: #999999;
-        text-align: center;
-        margin-top: 30px;
-      }
-      .footer a {
-        color: #fe6201;
-        text-decoration: none;
-      }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ExpiryDeals OTP Verification</title>
   </head>
-  <body>
-    <div class="container">
-      <div class="email-body">
-        <div class="logo">
-          <img
-            src="https://api.jusbuy.net/uploads/logo/logo.png"
-            alt="JusBuy Logo"
-          />
-        </div>
-        <div class="otp-message">
-          <p>{{email}}</p>
-          <p>
-            Your One-Time Password (OTP) to verify your account on JusBuy is:
-          </p>
-          <p class="otp-code">{{otp}}</p>
-          <p>
-            This code is valid for 3 minutes. Please do not share this code with
-            anyone.
-          </p>
-        </div>
-        <div class="cta">
-          <p>Thank you for choosing JusBuy!</p>
-          <p>
-            <a href="https://jusbuy.net/" style="color: #fe6201"
-              >Visit our website</a
-            >
-          </p>
-        </div>
-      </div>
-      <div class="footer">
-        <p>
-          If you didn’t request this OTP, please
-          <a href="mailto:jusbuyinc@gmail.com">contact support</a>.
-        </p>
-      </div>
-    </div>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+    "
+  >
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="background-color: #ffffff; padding: 20px"
+    >
+      <tr>
+        <td align="center">
+          <table
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            style="
+              background-color: #ffffff;
+              border: 1px solid #e5e5e5;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              position: relative;
+              overflow: hidden;
+            "
+          >
+            <!-- Email Content -->
+            <tr>
+              <td style="position: relative; text-align: center">
+                <div style="z-index: 1; position: relative; padding: 20px">
+                  <!-- Header -->
+                  <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                  >
+                    <tr>
+                      <td
+                        align="center"
+                        style="
+                          background-color: #ff4d4d;
+                          color: #ffffff;
+                          padding: 20px;
+                          border-top-left-radius: 8px;
+                          border-top-right-radius: 8px;
+                          font-size: 24px;
+                        "
+                      >
+                        <strong>Verify Your Account</strong>
+                      </td>
+                    </tr>
+                  </table>
+                  <!-- Body -->
+                  <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                    style="padding: 20px"
+                  >
+                    <tr>
+                      <td
+                        style="
+                          color: #333333;
+                          font-size: 16px;
+                          line-height: 1.6;
+                          text-align: left;
+                        "
+                      >
+                        <h2 style="color: #ff4d4d; margin-top: 5px">
+                          Hello {{email}},
+                        </h2>
+                        <p>
+                          Welcome to <strong>ExpiryDeals</strong>! To complete
+                          your account verification, please use the OTP below:
+                        </p>
+                        <table
+                          style="
+                            margin: 20px 0;
+                            font-size: 16px;
+                            line-height: 1.6;
+                            color: #333333;
+                          "
+                        >
+                          <tr>
+                            <td><strong>OTP:</strong> {{otp}}</td>
+                          </tr>
+                        </table>
+                        <p>
+                          This OTP is valid for 3 minutes. Please enter it on
+                          the verification page to activate your account. Do not
+                          share it with anyone.
+                        </p>
+                        <p>
+                          If you didn’t request this verification, please ignore
+                          this email or contact our support team for assistance.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  <!-- Footer -->
+                  <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                    style="
+                      background-color: #f9f9f9;
+                      padding: 15px;
+                      border-top: 1px solid #e5e5e5;
+                    "
+                  >
+                    <tr>
+                      <td
+                        align="center"
+                        style="
+                          font-size: 12px;
+                          color: #777777;
+                          text-align: center;
+                        "
+                      >
+                        <p>
+                          Need help?
+                          <a
+                            href="mailto:expirydeals7@gmail.com"
+                            style="color: #ff4d4d"
+                            >Contact Support</a
+                          >
+                        </p>
+                        <p>© 2025 ExpiryDeals. All rights reserved.</p>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
