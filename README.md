@@ -78,7 +78,7 @@ Expiry Deals Backend is a robust Node.js/TypeScript RESTful API server designed 
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/your-org/expiry-deals-backend.git
+   git clone https://github.com/mdnazmulhasanniloy/expiry-deals-backend.git
    cd expiry-deals-backend
    ```
 
