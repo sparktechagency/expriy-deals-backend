@@ -16,6 +16,7 @@ router.post(
 router.patch(
   '/approve/:id',
   auth(USER_ROLE.admin),
+  validateRequest(withdrawRequestValidation?.approveRequestValidator),
   withdrawRequestController.approvedWithdrawRequest,
 );
 

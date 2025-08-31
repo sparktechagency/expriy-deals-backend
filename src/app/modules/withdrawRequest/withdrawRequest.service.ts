@@ -11,8 +11,6 @@ import { IUser } from '../user/user.interface';
 import { notificationServices } from '../notification/notification.service';
 import { USER_ROLE } from '../user/user.constants';
 import { modeType } from '../notification/notification.interface';
-import stripe from '../../class/stripe/stripe';
-import StripePaymentService from '../../class/stripe/stripe';
 
 const createWithdrawRequest = async (payload: IWithdrawRequest) => {
   const bankDetails: IBankDetails | null = await BankDetails.findByVendorId(
@@ -107,10 +105,13 @@ const updateWithdrawRequest = async (
   }
   return result;
 };
-const approvedWithdrawRequest = async (id: string) => {
+const approvedWithdrawRequest = async (
+  id: string,
+  payload: { refNumber: string },
+) => {
   const result = await WithdrawRequest.findByIdAndUpdate(
     id,
-    { status: 'approved' },
+    { status: 'approved', refNumber: payload?.refNumber },
     {
       new: true,
     },
@@ -121,19 +122,10 @@ const approvedWithdrawRequest = async (id: string) => {
       'Failed to update WithdrawRequest',
     );
   }
-  const vendor: IUser | null = await User.findById(result.vendor).select(
-    'stripeAccountId',
-  );
-  if (!vendor) throw new AppError(httpStatus.BAD_REQUEST, 'vendor not found');
-  const transfer = await StripePaymentService.transfer(
-    Number(result.amount),
-    vendor?.stripeccountId,
-  );
-
   await notificationServices.insertNotificationIntoDb({
     receiver: result?.vendor,
     message: 'Withdrawal Request Approved',
-    description: `Your withdrawal request of $${result?.amount || 'N/A'} has been approved and is being processed.`,
+    description: `Your withdrawal request of $${result?.amount || 'N/A'} has been approved Ref.Number:${payload?.refNumber} and is being processed.`,
     refference: result?._id,
     model_type: modeType.WithdrawRequest,
   });

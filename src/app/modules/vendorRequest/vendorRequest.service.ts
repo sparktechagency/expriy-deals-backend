@@ -16,8 +16,7 @@ import { startSession } from 'mongoose';
 import { deleteFromS3, uploadToS3 } from '../../utils/s3';
 
 const createVendorRequest = async (payload: IVendorRequest, file: any) => {
-  const isExist = await User.isUserExist(payload.email);
-  console.log('🚀 ~ createVendorRequest ~ isExist:', isExist);
+  const isExist = await User.isUserExist(payload.email); 
   if (isExist)
     throw new AppError(
       httpStatus.BAD_REQUEST,

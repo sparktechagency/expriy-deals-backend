@@ -58,7 +58,7 @@ const createPayments = async (payload: IPayments) => {
             author: order.author,
             order: order._id,
             trnId,
-            price: order.totalPrice,
+            price: Math.round(order.totalPrice),
           },
         ],
         { session },
@@ -151,7 +151,7 @@ const confirmPayment = async (query: Record<string, any>) => {
     if (!payment) {
       throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
     }
-    
+
     const order = await Order.findByIdAndUpdate(
       payment?.order,
       {
@@ -160,6 +160,12 @@ const confirmPayment = async (query: Record<string, any>) => {
         isPaid: true,
       },
       { new: true, session },
+    );
+
+    await User.findByIdAndUpdate(
+      payment?.author,
+      { $inc: { balance: payment?.vendorAmount } },
+      { session },
     );
 
     if (!order) {

@@ -43,7 +43,7 @@ const productsSchema = new Schema<IProducts>(
     },
     expiredAt: {
       type: String,
-      required: [true, 'Expiry date is required'],
+      default: null, 
     },
     discount: {
       type: Number,

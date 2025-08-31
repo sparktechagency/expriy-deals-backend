@@ -41,18 +41,6 @@ const getMyWithdrawRequest = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// const myWithdrawRequest = catchAsync(async (req: Request, res: Response) => {
-//   const result = await withdrawRequestService.myWithdrawRequest(
-//     req.user?.userId
-//   );
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'My withdraw request fetched successfully',
-//     data: result,
-//   });
-// });
-
 const getWithdrawRequestById = catchAsync(
   async (req: Request, res: Response) => {
     const result = await withdrawRequestService.getWithdrawRequestById(
@@ -86,6 +74,7 @@ const approvedWithdrawRequest = catchAsync(
   async (req: Request, res: Response) => {
     const result = await withdrawRequestService.approvedWithdrawRequest(
       req.params.id,
+      req.body,
     );
     sendResponse(res, {
       statusCode: 200,

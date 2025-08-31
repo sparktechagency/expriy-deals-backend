@@ -13,7 +13,12 @@ const upload = multer({ storage });
 
 router.post(
   '/',
-  auth(USER_ROLE.admin),
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.sub_admin,
+    USER_ROLE.super_admin,
+    USER_ROLE.vendor,
+  ),
   upload.single('banner'),
   parseData(),
   categoryController.createCategory,
@@ -21,7 +26,12 @@ router.post(
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.admin),
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.sub_admin,
+    USER_ROLE.super_admin,
+    USER_ROLE.vendor,
+  ),
   upload.single('banner'),
   parseData(),
   categoryController.updateCategory,
@@ -29,8 +39,12 @@ router.patch(
 
 router.delete(
   '/:id',
-  auth(USER_ROLE.admin), 
-  auth(USER_ROLE.admin),
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.sub_admin,
+    USER_ROLE.super_admin,
+    USER_ROLE.vendor,
+  ),
   categoryController.deleteCategory,
 );
 
