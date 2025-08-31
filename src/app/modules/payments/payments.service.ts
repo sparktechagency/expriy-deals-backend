@@ -93,7 +93,7 @@ const createPayments = async (payload: IPayments) => {
 
     // Prepare product info for checkout
     const product = {
-      amount: Math.round(payment.price),
+      amount: parseFloat(payment.price.toFixed(2)), 
       name: (order.product as IProducts)?.name || 'A Product',
 
       quantity: 1,
