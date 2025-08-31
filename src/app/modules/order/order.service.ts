@@ -13,13 +13,16 @@ const createOrder = async (payload: IOrder) => {
   }
 
   payload.author = product?.author;
-  payload.totalPrice = Number(
-    (
-      product.price *
-      (1 - Number(product.discount ?? 0) / 100) *
-      payload.quantity
-    ).toFixed(2),
-  );
+  if (product.discount && product.discount > 0) {
+    const discountedPrice = product.price * (1 - product.discount / 100);
+    payload.totalPrice = parseFloat(
+      (discountedPrice * payload.quantity).toFixed(2),
+    );
+  } else {
+    payload.totalPrice = parseFloat(
+      (product.price * payload.quantity).toFixed(2),
+    );
+  }
 
   payload.discount = Number(product?.discount);
   const result = await Order.create(payload);

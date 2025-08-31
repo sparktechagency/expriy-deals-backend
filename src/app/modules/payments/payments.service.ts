@@ -58,7 +58,7 @@ const createPayments = async (payload: IPayments) => {
             author: order.author,
             order: order._id,
             trnId,
-            price: Math.round(order.totalPrice),
+            price: parseFloat(order.totalPrice.toFixed(2)),
           },
         ],
         { session },
@@ -93,7 +93,7 @@ const createPayments = async (payload: IPayments) => {
 
     // Prepare product info for checkout
     const product = {
-      amount: parseFloat(payment.price.toFixed(2)), 
+      amount: parseFloat(payment.price.toFixed(2)),
       name: (order.product as IProducts)?.name || 'A Product',
 
       quantity: 1,
