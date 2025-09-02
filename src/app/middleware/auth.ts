@@ -28,7 +28,7 @@ const auth = (...userRoles: string[]) => {
       throw new AppError(httpStatus.NOT_FOUND, 'user not found');
     }
     if (isUserExist.status === 'blocked') {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'You are blocked form admin');
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are blocked from admin');
     }
     if (userRoles && !userRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
