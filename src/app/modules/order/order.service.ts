@@ -13,14 +13,16 @@ const createOrder = async (payload: IOrder) => {
   }
 
   payload.author = product?.author;
+  const taxRate = 0.0825; // 8.25%
+
   if (product.discount && product.discount > 0) {
     const discountedPrice = product.price * (1 - product.discount / 100);
     payload.totalPrice = parseFloat(
-      (discountedPrice * payload.quantity).toFixed(2),
+      (discountedPrice * payload.quantity * (1 + taxRate)).toFixed(2),
     );
   } else {
     payload.totalPrice = parseFloat(
-      (product.price * payload.quantity).toFixed(2),
+      (product.price * payload.quantity * (1 + taxRate)).toFixed(2),
     );
   }
 
