@@ -27,6 +27,7 @@ const createPayments = async (payload: IPayments) => {
     const order = await Order.findById(payload.order)
       .populate({ path: 'product', select: '_id name images' })
       .session(session);
+    console.log('🚀 ~ createPayments ~ order:', order);
     if (!order) throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
 
     // Check for existing pending payment for this order
@@ -58,7 +59,7 @@ const createPayments = async (payload: IPayments) => {
             author: order.author,
             order: order._id,
             trnId,
-            price: parseFloat(order.totalPrice.toFixed(2)),
+            price: order.totalPrice,
           },
         ],
         { session },
@@ -93,12 +94,12 @@ const createPayments = async (payload: IPayments) => {
 
     // Prepare product info for checkout
     const product = {
-      amount: parseFloat(payment.price.toFixed(2)),
+      amount: payment.price,
       name: (order.product as IProducts)?.name || 'A Product',
 
       quantity: 1,
     };
-
+    console.log(product);
     const successUrl = `${config.server_url}/payments/confirm-payment?sessionId={CHECKOUT_SESSION_ID}&paymentId=${payment._id}`;
     const cancelUrl = `${config.server_url}/payments/cancel?paymentId=${payment._id}`;
     const currency = config.stripe.currency || 'usd';
