@@ -17,13 +17,11 @@ const createOrder = async (payload: IOrder) => {
 
   if (product.discount && product.discount > 0) {
     const discountedPrice = product.price * (1 - product.discount / 100);
-    payload.totalPrice = parseFloat(
-      (discountedPrice * payload.quantity * (1 + taxRate)).toFixed(2),
-    );
+    const subtotal = discountedPrice * payload.quantity;
+    payload.totalPrice = parseFloat((subtotal * (1 + taxRate)).toFixed(2));
   } else {
-    payload.totalPrice = parseFloat(
-      (product.price * payload.quantity * (1 + taxRate)).toFixed(2),
-    );
+    const subtotal = product.price * payload.quantity;
+    payload.totalPrice = parseFloat((subtotal * (1 + taxRate)).toFixed(2));
   }
 
   payload.discount = Number(product?.discount);

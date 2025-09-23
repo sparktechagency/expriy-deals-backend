@@ -137,9 +137,16 @@ const confirmPayment = async (query: Record<string, any>) => {
       'Payment session is not completed',
     );
   }
+  const payment = await Payments.findById(paymentId)
+ if (!payment) {
+   throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
+ }
 
+ if (payment?.status === PAYMENT_STATUS.paid)
+   throw new AppError(httpStatus.BAD_GATEWAY, 'this payment already confirmed');
   try {
     session.startTransaction();
+
     const payment = await Payments.findByIdAndUpdate(
       paymentId,
       { status: PAYMENT_STATUS?.paid, paymentIntentId: paymentIntentId },
@@ -151,8 +158,7 @@ const confirmPayment = async (query: Record<string, any>) => {
 
     if (!payment) {
       throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
-    }
-
+    } 
     const order = await Order.findByIdAndUpdate(
       payment?.order,
       {
