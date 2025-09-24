@@ -24,10 +24,8 @@ const createPayments = async (payload: IPayments) => {
   session.startTransaction();
   try {
     // Find order with product populated, in transaction session
-    const order = await Order.findById(payload.order)
-      .populate({ path: 'product', select: '_id name images' })
-      .session(session);
-    console.log('🚀 ~ createPayments ~ order:', order);
+    const order = await Order.findById(payload.order) 
+      .session(session); 
     if (!order) throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
 
     // Check for existing pending payment for this order
@@ -51,6 +49,8 @@ const createPayments = async (payload: IPayments) => {
       }
       payment = newPayment;
     } else {
+      const adminAmount = order.totalPrice * 0.08
+      const vendorAmount = order.totalPrice * 0.92;
       // Create new payment document
       payment = await Payments.create(
         [
@@ -59,6 +59,8 @@ const createPayments = async (payload: IPayments) => {
             author: order.author,
             order: order._id,
             trnId,
+            adminAmount,
+            vendorAmount,
             price: order.totalPrice,
           },
         ],

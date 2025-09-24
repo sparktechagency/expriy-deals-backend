@@ -49,16 +49,5 @@ const paymentsSchema = new Schema<IPayments>(
   },
 );
 
-paymentsSchema.pre('save', function (next) {
-  if (
-    this.isModified('price') ||
-    this.adminAmount == null ||
-    this.vendorAmount == null
-  ) {
-    this.adminAmount = Number(this.price) * 0.1;
-    this.vendorAmount = Number(this.price) * 0.9;
-  }
-  next();
-});
 const Payments = model<IPayments, IPaymentsModules>('Payments', paymentsSchema);
 export default Payments;

@@ -81,22 +81,7 @@ const orderSchema = new Schema<IOrder>(
   },
 );
 
-//orderSchema.pre('find', function (next) {
-//  //@ts-ignore
-//  this.find({ isDeleted: { $ne: true } });
-//  next();
-//});
-
-//orderSchema.pre('findOne', function (next) {
-//@ts-ignore
-//this.find({ isDeleted: { $ne: true } });
-// next();
-//});
-
-orderSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
-  next();
-});
+ 
 
 const Order = model<IOrder, IOrderModules>('Order', orderSchema);
 export default Order;
