@@ -31,8 +31,7 @@ const createProductSchema = z.object({
     quantity: z.number().min(1, { message: 'Quantity is required.' }),
 
     expiredAt: z
-      .string()
-      .min(1, { message: 'Expiry date is required.' })
+      .string() 
       .optional(),
 
     discount: z.number().optional(),
