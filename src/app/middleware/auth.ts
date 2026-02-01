@@ -25,7 +25,7 @@ const auth = (...userRoles: string[]) => {
     const { role, userId } = decode;
     const isUserExist = await User.IsUserExistId(userId);
     if (!isUserExist) {
-      throw new AppError(httpStatus.NOT_FOUND, 'user not found');
+      throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid user access');
     }
     if (isUserExist.status === 'blocked') {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are blocked from admin');

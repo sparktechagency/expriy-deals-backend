@@ -12,6 +12,8 @@ router.delete(
   auth(USER_ROLE.user),
   addToCardController.deleteAddToCard,
 );
+router.delete('/empty', auth(USER_ROLE.user), addToCardController.emptyMyCard);
+
 router.get('/:id', auth(USER_ROLE.user), addToCardController.getAddToCardById);
 router.get('/', auth(USER_ROLE.user), addToCardController.getAllAddToCard);
 

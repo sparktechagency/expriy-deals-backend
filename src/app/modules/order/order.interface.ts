@@ -1,7 +1,12 @@
 import { Model, ObjectId } from 'mongoose';
 import { IUser } from '../user/user.interface';
 import { IProducts } from '../products/products.interface';
-
+interface IItems {
+  product: ObjectId | IProducts;
+  price: number;
+  quantity: number;
+  discount?: number;
+}
 export interface IOrder {
   id: string;
   user: ObjectId | IUser;
@@ -10,6 +15,7 @@ export interface IOrder {
   totalPrice: number;
   discount: number;
   quantity: number;
+  items: IItems[];
   tnxId: string;
   status: 'pending' | 'ongoing' | 'cancelled' | 'delivered';
   isPaid: boolean;

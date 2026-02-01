@@ -7,24 +7,52 @@ import Products from '../products/products.models';
 import { IProducts } from '../products/products.interface';
 
 const createOrder = async (payload: IOrder) => {
-  const product: IProducts | null = await Products.findById(payload?.product);
-  if (!product) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Product is not found!');
+  for (const item of payload!.items) {
+    const product: IProducts | null = await Products.findById(item.product);
+
+    if (!product) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Product is not found!');
+    }
+
+    item['price'] =
+      product.discount && product.discount > 0
+        ? parseFloat((product.price * (1 - product.discount / 100)).toFixed(2))
+        : product.price;
+    if (product.discount) {
+      item['discount'] = product.discount;
+    }
   }
 
-  payload.author = product?.author;
+  const total = payload.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
   const taxRate = 0.0825; // 8.25%
 
-  if (product.discount && product.discount > 0) {
-    const discountedPrice = product.price * (1 - product.discount / 100);
-    const subtotal = discountedPrice * payload.quantity;
-    payload.totalPrice = parseFloat((subtotal * (1 + taxRate)).toFixed(2));
-  } else {
-    const subtotal = product.price * payload.quantity;
-    payload.totalPrice = parseFloat((subtotal * (1 + taxRate)).toFixed(2));
-  }
+  const taxAmount = total * taxRate;
 
-  payload.discount = Number(product?.discount);
+  payload.totalPrice = parseFloat((total + taxAmount).toFixed(2));
+
+  // const product: IProducts | null = await Products.findById(payload?.product);
+
+  // if (!product) {
+  //   throw new AppError(httpStatus.NOT_FOUND, 'Product is not found!');
+  // }
+
+  // payload.author = product?.author;
+  // const taxRate = 0.0825; // 8.25%
+
+  // if (product.discount && product.discount > 0) {
+  //   const discountedPrice = product.price * (1 - product.discount / 100);
+  //   const subtotal = discountedPrice * payload.quantity;
+  //   payload.totalPrice = parseFloat((subtotal * (1 + taxRate)).toFixed(2));
+  // } else {
+  //   const subtotal = product.price * payload.quantity;
+  //   payload.totalPrice = parseFloat((subtotal * (1 + taxRate)).toFixed(2));
+  // }
+
+  // payload.discount = Number(product?.discount);
   const result = await Order.create(payload);
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create order');
@@ -36,7 +64,7 @@ const getAllOrder = async (query: Record<string, any>) => {
   const orderModel = new QueryBuilder(
     Order.find({ isDeleted: false }).populate([
       {
-        path: 'product',
+        path: 'items.product',
         populate: [
           {
             path: 'author',
@@ -73,7 +101,7 @@ const getAllOrder = async (query: Record<string, any>) => {
 const getOrderById = async (id: string) => {
   const result = await Order.findById(id).populate([
     {
-      path: 'product',
+      path: 'items.product',
       populate: [
         {
           path: 'author',

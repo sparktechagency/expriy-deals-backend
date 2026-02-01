@@ -24,8 +24,7 @@ const createPayments = async (payload: IPayments) => {
   session.startTransaction();
   try {
     // Find order with product populated, in transaction session
-    const order = await Order.findById(payload.order) 
-      .session(session); 
+    const order = await Order.findById(payload.order).session(session);
     if (!order) throw new AppError(httpStatus.NOT_FOUND, 'Order not found');
 
     // Check for existing pending payment for this order
@@ -49,7 +48,7 @@ const createPayments = async (payload: IPayments) => {
       }
       payment = newPayment;
     } else {
-      const adminAmount = order.totalPrice * 0.08
+      const adminAmount = order.totalPrice * 0.08;
       const vendorAmount = order.totalPrice * 0.92;
       // Create new payment document
       payment = await Payments.create(
@@ -97,8 +96,7 @@ const createPayments = async (payload: IPayments) => {
     // Prepare product info for checkout
     const product = {
       amount: payment.price,
-      name: (order.product as IProducts)?.name || 'A Product',
-
+      name: 'Shopping Payment',
       quantity: 1,
     };
     console.log(product);
@@ -139,13 +137,16 @@ const confirmPayment = async (query: Record<string, any>) => {
       'Payment session is not completed',
     );
   }
-  const payment = await Payments.findById(paymentId)
- if (!payment) {
-   throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
- }
+  const payment = await Payments.findById(paymentId);
+  if (!payment) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
+  }
 
- if (payment?.status === PAYMENT_STATUS.paid)
-   throw new AppError(httpStatus.BAD_GATEWAY, 'this payment already confirmed');
+  if (payment?.status === PAYMENT_STATUS.paid)
+    throw new AppError(
+      httpStatus.BAD_GATEWAY,
+      'this payment already confirmed',
+    );
   try {
     session.startTransaction();
 
@@ -160,7 +161,7 @@ const confirmPayment = async (query: Record<string, any>) => {
 
     if (!payment) {
       throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
-    } 
+    }
     const order = await Order.findByIdAndUpdate(
       payment?.order,
       {
@@ -183,16 +184,18 @@ const confirmPayment = async (query: Record<string, any>) => {
     // const admin = await User.findOne({ role: USER_ROLE.admin });
 
     // 🔽 Add this block right after the order update
-    await Products.findByIdAndUpdate(
-      order.product,
-      {
-        $inc: {
-          stock: -order.quantity,
-          totalSell: order.quantity,
+    for (const item of order.items) {
+      await Products.findByIdAndUpdate(
+        item.product,
+        {
+          $inc: {
+            stock: -item.quantity,
+            totalSell: item.quantity,
+          },
         },
-      },
-      { session },
-    );
+        { session },
+      );
+    }
 
     notificationServices.insertNotificationIntoDb({
       receiver: (payment?.user as IUser)?._id,

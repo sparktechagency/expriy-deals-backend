@@ -18,24 +18,33 @@ const orderSchema = new Schema<IOrder>(
       ref: 'User',
       required: [true, 'author is required'],
     },
-    product: {
-      type: Schema.Types.ObjectId,
-      ref: 'Products',
-      required: [true, 'Product is required'],
-    },
+    items: [
+      {
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: 'Products',
+          required: [true, 'Product is required'],
+        },
+        price: {
+          type: Number,
+          required: [true, 'Price is required'],
+        },
+        discount: {
+          type: Number,
+          required: [true, 'discount is required'],
+          min: 0,
+        },
+        quantity: {
+          type: Number,
+          required: [true, 'Quantity is required'],
+          min: 1,
+        },
+      },
+    ],
+
     totalPrice: {
       type: Number,
       required: [true, 'Total price is required'],
-      min: 1,
-    },
-    discount: {
-      type: Number,
-      required: [true, 'discount is required'],
-      min: 0,
-    },
-    quantity: {
-      type: Number,
-      required: [true, 'Quantity is required'],
       min: 1,
     },
     tnxId: {
@@ -80,8 +89,6 @@ const orderSchema = new Schema<IOrder>(
     timestamps: true,
   },
 );
-
- 
 
 const Order = model<IOrder, IOrderModules>('Order', orderSchema);
 export default Order;

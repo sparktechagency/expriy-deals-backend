@@ -5,6 +5,20 @@ import AppError from '../../error/AppError';
 import QueryBuilder from '../../class/builder/QueryBuilder';
 
 const createAddToCard = async (payload: IAddToCard) => {
+  const isExisting = await AddToCard.findOne({
+    product: payload.product,
+    user: payload.user,
+  });
+
+  if (isExisting) {
+    const result = await AddToCard.findByIdAndUpdate(
+      isExisting.id,
+      { quantity: isExisting.quantity + 1 },
+      { new: true },
+    );
+    return result;
+  }
+
   const result = await AddToCard.create(payload);
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create addToCard');
@@ -64,6 +78,17 @@ const updateAddToCard = async (id: string, payload: Partial<IAddToCard>) => {
   return result;
 };
 
+const emptyMyCard = async (id: string) => {
+  const result = await AddToCard.deleteMany({
+    user: id,
+  });
+  if (!result) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete addToCard');
+  }
+  return result;
+};
+
+
 const deleteAddToCard = async (id: string) => {
   const result = await AddToCard.findByIdAndDelete(id);
   if (!result) {
@@ -78,4 +103,5 @@ export const addToCardService = {
   getAddToCardById,
   updateAddToCard,
   deleteAddToCard,
+  emptyMyCard,
 };

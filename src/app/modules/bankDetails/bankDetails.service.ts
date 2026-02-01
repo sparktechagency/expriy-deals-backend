@@ -5,6 +5,14 @@ import AppError from '../../error/AppError';
 import QueryBuilder from '../../class/builder/QueryBuilder';
 
 const createBankDetails = async (payload: IBankDetails) => {
+  const isExist = await BankDetails.findOne({ vendor: payload.vendor });
+  if (isExist) {
+    const result = await BankDetails.findByIdAndUpdate(isExist._id, payload, {
+      new: true,
+    });
+    return result;
+  }
+
   const result = await BankDetails.create(payload);
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create bankDetails');

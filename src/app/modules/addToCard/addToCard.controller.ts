@@ -15,6 +15,7 @@ const createAddToCard = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllAddToCard = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.user.userId);
   req.query.user = req.user.userId;
   const result = await addToCardService.getAllAddToCard(req.query);
   sendResponse(res, {
@@ -26,6 +27,7 @@ const getAllAddToCard = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAddToCardById = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.user.userId);
   const result = await addToCardService.getAddToCardById(req.params.id);
   sendResponse(res, {
     statusCode: 200,
@@ -56,6 +58,15 @@ const deleteAddToCard = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const emptyMyCard = catchAsync(async (req: Request, res: Response) => {
+  const result = await addToCardService.emptyMyCard(req.user.userId);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'AddToCard emptied successfully',
+    data: result,
+  });
+});
 
 export const addToCardController = {
   createAddToCard,
@@ -63,4 +74,5 @@ export const addToCardController = {
   getAddToCardById,
   updateAddToCard,
   deleteAddToCard,
+  emptyMyCard,
 };

@@ -4,8 +4,7 @@ import { userService } from './user.service';
 import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
 import { uploadToS3 } from '../../utils/s3';
-import { otpServices } from '../otp/otp.service';
-import { User } from './user.models';
+import { otpServices } from '../otp/otp.service'; 
 import { UploadedFiles } from '../../interface/common.interface';
 
 const createUser = catchAsync(async (req: Request, res: Response) => {

@@ -43,6 +43,15 @@ const getAllShop = async (query: Record<string, any>) => {
         spherical: true,
       },
     });
+
+    // convert to KM
+    pipeline.push({
+      $addFields: {
+        distanceKm: {
+          $divide: ['$dist.calculated', 1000],
+        },
+      },
+    });
   }
 
   // Add a match to exclude deleted documents
