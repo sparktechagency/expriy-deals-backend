@@ -9,6 +9,8 @@ import globalErrorHandler from './app/middleware/globalErrorhandler';
 import notFound from './app/middleware/notfound';
 import router from './app/routes';
 const app: Application = express();
+app.set('view engine', 'ejs');
+app.set('views', 'public/ejs');
 app.use(express.static('public'));
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
