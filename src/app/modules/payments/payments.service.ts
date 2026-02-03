@@ -18,6 +18,7 @@ import { modeType } from '../notification/notification.interface';
 import moment from 'moment';
 import { USER_ROLE } from '../user/user.constants';
 import Products from '../products/products.models';
+import { Response } from 'express';
 
 const createPayments = async (payload: IPayments) => {
   const session = await startSession();
@@ -124,7 +125,7 @@ const createPayments = async (payload: IPayments) => {
   }
 };
 
-const confirmPayment = async (query: Record<string, any>) => {
+const confirmPayment = async (query: Record<string, any>, res: Response) => {
   const { sessionId, paymentId } = query;
   const session = await startSession();
   const PaymentSession =
@@ -132,21 +133,26 @@ const confirmPayment = async (query: Record<string, any>) => {
   const paymentIntentId = PaymentSession.payment_intent as string;
 
   if (!(await StripePaymentService.isPaymentSuccess(sessionId))) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'Payment session is not completed',
-    );
+    throw res.render('paymentError', {
+      message: 'Payment session is not completed',
+      device: '',
+    });
   }
+
   const payment = await Payments.findById(paymentId);
   if (!payment) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
+    throw res.render('paymentError', {
+      message: 'Payment Not Found!',
+      device: '',
+    });
   }
 
   if (payment?.status === PAYMENT_STATUS.paid)
-    throw new AppError(
-      httpStatus.BAD_GATEWAY,
-      'this payment already confirmed',
-    );
+    throw res.render('paymentError', {
+      message: 'this payment already confirmed',
+      device: '',
+    });
+
   try {
     session.startTransaction();
 
@@ -160,8 +166,12 @@ const confirmPayment = async (query: Record<string, any>) => {
     ]);
 
     if (!payment) {
-      throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!');
+      throw res.render('paymentError', {
+        message: 'Payment model not found',
+        device: '',
+      });
     }
+
     const order = await Order.findByIdAndUpdate(
       payment?.order,
       {
@@ -179,7 +189,10 @@ const confirmPayment = async (query: Record<string, any>) => {
     );
 
     if (!order) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'order confirmation failed');
+      throw res.render('paymentError', {
+        message: 'order confirmation failed',
+        device: '',
+      });
     }
     // const admin = await User.findOne({ role: USER_ROLE.admin });
 
@@ -227,7 +240,10 @@ const confirmPayment = async (query: Record<string, any>) => {
       }
     }
 
-    throw new AppError(httpStatus.BAD_GATEWAY, error.message);
+    throw res.render('paymentError', {
+      message: error.message || 'Payment confirmation failed',
+      device: '',
+    });
   } finally {
     session.endSession();
   }

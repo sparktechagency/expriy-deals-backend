@@ -16,8 +16,13 @@ const createPayments = catchAsync(async (req: Request, res: Response) => {
 });
 
 const confirmPayment = catchAsync(async (req: Request, res: Response) => {
-  const result = await paymentsService.confirmPayment(req?.query);
+  const result = await paymentsService.confirmPayment(req?.query, res);
   // res.redirect(`${config.success_url}?subscriptionId=${result?.subscription}`);
+
+  res.render('paymentSuccess', {
+    paymentDetails: result,
+  });
+
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
