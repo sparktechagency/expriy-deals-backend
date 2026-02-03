@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.withdrawRequestRoutes = void 0;
+const express_1 = require("express");
+const withdrawRequest_controller_1 = require("./withdrawRequest.controller");
+const auth_1 = __importDefault(require("../../middleware/auth"));
+const user_constants_1 = require("../user/user.constants");
+const validateRequest_1 = __importDefault(require("../../middleware/validateRequest"));
+const withdrawRequest_validation_1 = require("./withdrawRequest.validation");
+const router = (0, express_1.Router)();
+router.post('/', (0, auth_1.default)(user_constants_1.USER_ROLE.vendor), withdrawRequest_controller_1.withdrawRequestController.createWithdrawRequest);
+router.patch('/approve/:id', (0, auth_1.default)(user_constants_1.USER_ROLE.admin), (0, validateRequest_1.default)(withdrawRequest_validation_1.withdrawRequestValidation === null || withdrawRequest_validation_1.withdrawRequestValidation === void 0 ? void 0 : withdrawRequest_validation_1.withdrawRequestValidation.approveRequestValidator), withdrawRequest_controller_1.withdrawRequestController.approvedWithdrawRequest);
+router.patch('/reject/:id', (0, auth_1.default)(user_constants_1.USER_ROLE.admin), (0, validateRequest_1.default)(withdrawRequest_validation_1.withdrawRequestValidation === null || withdrawRequest_validation_1.withdrawRequestValidation === void 0 ? void 0 : withdrawRequest_validation_1.withdrawRequestValidation.rejectRequestValidator), withdrawRequest_controller_1.withdrawRequestController.rejectWithdrawRequest);
+router.patch('/:id', (0, auth_1.default)(user_constants_1.USER_ROLE.admin), withdrawRequest_controller_1.withdrawRequestController.updateWithdrawRequest);
+router.delete('/:id', (0, auth_1.default)(user_constants_1.USER_ROLE.admin), withdrawRequest_controller_1.withdrawRequestController.deleteWithdrawRequest);
+router.get('/my-request', (0, auth_1.default)(user_constants_1.USER_ROLE.vendor), withdrawRequest_controller_1.withdrawRequestController.getMyWithdrawRequest);
+router.get('/:id', (0, auth_1.default)(user_constants_1.USER_ROLE.admin, user_constants_1.USER_ROLE.vendor), withdrawRequest_controller_1.withdrawRequestController.getWithdrawRequestById);
+router.get('/', (0, auth_1.default)(user_constants_1.USER_ROLE.admin), withdrawRequest_controller_1.withdrawRequestController.getAllWithdrawRequest);
+exports.withdrawRequestRoutes = router;

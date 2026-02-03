@@ -1,0 +1,23 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.paymentsRoutes = void 0;
+const express_1 = require("express");
+const payments_controller_1 = require("./payments.controller");
+const auth_1 = __importDefault(require("../../middleware/auth"));
+const user_constants_1 = require("../user/user.constants");
+const router = (0, express_1.Router)();
+router.post('/checkout', (0, auth_1.default)(user_constants_1.USER_ROLE.user), payments_controller_1.paymentsController.createPayments);
+router.get('/dashboard-data', (0, auth_1.default)(user_constants_1.USER_ROLE.admin), payments_controller_1.paymentsController.dashboardData);
+router.get('/vendor-dashboard-data', (0, auth_1.default)(user_constants_1.USER_ROLE.vendor), payments_controller_1.paymentsController.vendorDashboardData);
+router.get('/vendor-earnings', (0, auth_1.default)(user_constants_1.USER_ROLE.vendor), payments_controller_1.paymentsController.getVendorEarnings);
+router.get('/confirm-payment', payments_controller_1.paymentsController.confirmPayment);
+router.get('/earnings', (0, auth_1.default)(user_constants_1.USER_ROLE.admin), payments_controller_1.paymentsController.getEarnings);
+router.patch('/:id', payments_controller_1.paymentsController.updatePayments);
+router.delete('/:id', payments_controller_1.paymentsController.deletePayments);
+router.get('/:id', payments_controller_1.paymentsController.getPaymentsById);
+router.get('/order/:orderId', payments_controller_1.paymentsController.getPaymentsByOrderId);
+router.get('/', payments_controller_1.paymentsController.getAllPayments);
+exports.paymentsRoutes = router;
